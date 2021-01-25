@@ -379,6 +379,68 @@ async def 탈퇴(ctx):
                                f"%가입 명령어를 사용해 스프레드 시트에 등록하거나\n"
                                f"%닉변 명령어를 사용해 닉네임을 업데이트해주세요.```")
 
+# 닉네임, 주포, 부포 리셋
+@bot.command()
+async def 리셋(ctx):
+    key = 0
+    temp = ctx.author.display_name.split('[')
+    nickname = temp[0]
+    # 범위(체크)
+    cell_max = worksheet_list.acell('A1').value
+    # 범위 내 셀 값 로딩
+    range_list = worksheet_list.range('D2:D' + cell_max)
+
+    if "," in ctx.author.display_name:
+        await ctx.send("```정확한 닉네임 양식을 지켜주세요\n"
+                       "주 포지션과 부 포지션의 구분은 '/'을 사용해주세요.\n"
+                       "해당 봇에서는 ','를 인식하지 않으며, 이는 봇 고장의 원인이 됩니다.\n"
+                       "닉네임 양식 : 닉네임[주포지션/부포지션] or 닉네임[주포지션]```")
+    elif "." in ctx.author.display_name:
+        await ctx.send("```정확한 닉네임 양식을 지켜주세요\n"
+                       "주 포지션과 부 포지션의 구분은 '/'을 사용해주세요.\n"
+                       "해당 봇에서는 '.'를 인식하지 않으며, 이는 봇 고장의 원인이 됩니다.\n"
+                       "닉네임 양식 : 닉네임[주포지션/부포지션] or 닉네임[주포지션]```")
+    elif "[" in ctx.author.display_name:
+        if '/' in temp[1]:
+            a = temp[1].split('/')
+            jupo = a[0]
+            b = a[1].split(']')
+            bupo = b[0]
+            for i, cell in enumerate(range_list):
+                if str(cell.value) == str(ctx.author.id):
+                    check = i + 2
+                    worksheet_list.update_acell('C' + str(check), ctx.author.display_name)
+                    worksheet_list.update_acell('E' + str(check), nickname)
+                    worksheet_list.update_acell('F' + str(check), jupo)
+                    worksheet_list.update_acell('G' + str(check), bupo)
+                    key1 = 1
+                    break
+                else:
+                    key1 = 0
+            await ctx.send(content=f"```{ctx.author.display_name}님의 닉네임, 주포지션, 부포지션이 재업데이트 되었습니다.\n"
+                                   f"자세한 사항은 %시트링크 명령어를 입력하여, 시트에서 확인해주세요.```")
+
+
+        else:
+            a = temp[1].split(']')
+            jupo = a[0]
+            for i, cell in enumerate(range_list):
+                if str(cell.value) == str(ctx.author.id):
+                    check = i + 2
+                    worksheet_list.update_acell('C' + str(check), ctx.author.display_name)
+                    worksheet_list.update_acell('E' + str(check), nickname)
+                    worksheet_list.update_acell('F' + str(check), jupo)
+                    worksheet_list.update_acell('G' + str(check), '')
+                    key1 = 1
+                    break
+                else:
+                    key1 = 0
+            await ctx.send(content=f"```{ctx.author.display_name}님의 닉네임, 주포지션, 부포지션이 재업데이트 되었습니다.\n"
+                                   f"자세한 사항은 %시트링크 명령어를 입력하여, 시트에서 확인해주세요.```")
+    if key1 == 0:
+        await ctx.send(content=f"```스프레드 시트 명단에서 {ctx.author.display_name}님의 고유 ID 번호를 검색할 수 없습니다.\n```")
+
+
 
 # 주 포지션 업데이트
 @bot.command()
