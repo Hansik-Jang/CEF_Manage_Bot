@@ -44,22 +44,36 @@ async def on_ready():
 
 @bot.command()
 async def 테스트(ctx):
-    print(key)
+    a_nick_temp = []
+    a_list_temp = []
+    check_a_list = []
+    a_max = str(int(worksheet_check_A.acell('A1').value) + 1)
+    a_nick_list = worksheet_check_A.range('B3:B' + a_max)
+    a_list = worksheet_check_A.range('E3:G' + a_max)
+    temp = a_nick_list + a_list
+    for i, cell in enumerate(a_nick_list):
+        a_nick_temp.append(cell.value)
+    for i, cell in enumerate(a_list):
+        a_list_temp.append(cell.value)
+    print(temp)
+    print(len(a_nick_temp))
+    print(len(a_list_temp))
+    print(a_nick_temp)
+    print(a_list_temp)
+    print(check_a_list)
+    for i in range(1, len(a_nick_temp) + 2):
+        text = a_nick_temp[i] + "\t\t\t" + a_list_temp[3*i-2] + "\t" + a_list_temp[3*i-1] + "\t" + a_list_temp[3*i]
+        check_a_list.append(text)
 
 
 
 @bot.command()
 async def 테스트2(ctx):
-    time = datetime.datetime.now()
-    time_before = datetime.datetime(time.year, time.month, time.day, 20, 00, 00)
-    time_after = datetime.datetime(time.year, time.month, time.day, 23, 00, 00)
-    test_role = get(ctx.guild.roles, name='테스트')
-    A_check_channel = bot.get_channel(800389977472237618)
-    if time > time_before and time < time_after:
-
-        await ctx.send("시간 초과")
-    else:
-        await ctx.send(content=f"{test_role.mention}")
+    await ctx.send(                                           f"```cs\n"        
+                                           f"출석체크 및 확인 바랍니다.\n"
+                                           f"1경기 출석 가능 시간 : 전날 23:00 ~ 당일 20:30\n"
+                                           f"2경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n"
+                                           f"3경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n```")
 
 @bot.command()
 async def 시트링크(ctx):
@@ -1652,25 +1666,29 @@ async def 출석공지(ctx):
 
     if '스태프' in role_names:
         await A_check_channel.send(content=f"{A_role.mention}\n"
+                                           f"```cs\n"        
                                            f"출석체크 및 확인 바랍니다.\n"
                                            f"1경기 출석 가능 시간 : 전날 23:00 ~ 당일 20:30\n"
                                            f"2경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n"
-                                           f"3경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n")
+                                           f"3경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n```")
         await B_check_channel.send(content=f"{B_role.mention}\n"
+                                           f"```cs\n"        
                                            f"출석체크 및 확인 바랍니다.\n"
                                            f"1경기 출석 가능 시간 : 전날 23:00 ~ 당일 20:30\n"
                                            f"2경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n"
-                                           f"3경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n")
+                                           f"3경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n```")
         await C_check_channel.send(content=f"{C_role.mention}\n"
+                                           f"```cs\n"        
                                            f"출석체크 및 확인 바랍니다.\n"
                                            f"1경기 출석 가능 시간 : 전날 23:00 ~ 당일 20:30\n"
                                            f"2경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n"
-                                           f"3경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n")
+                                           f"3경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n```")
         await D_check_channel.send(content=f"{D_role.mention}\n"
+                                           f"```cs\n"        
                                            f"출석체크 및 확인 바랍니다.\n"
                                            f"1경기 출석 가능 시간 : 전날 23:00 ~ 당일 20:30\n"
                                            f"2경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n"
-                                           f"3경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n")
+                                           f"3경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n```")
     else:
         await ctx.send("```해당 명령어는 스태프만 사용 가능합니다.```")
 
