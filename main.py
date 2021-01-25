@@ -1000,21 +1000,13 @@ async def 출석(ctx, game):
     now_day = time_now.strftime('%d')
     role_names = [role.name for role in ctx.author.roles]
     # 범위(체크)
-    cell_max = worksheet_list.acell('A1').value
-    a_max = str(int(worksheet_check_A.acell('A1').value) + 1)
-    b_max = str(int(worksheet_check_B.acell('A1').value) + 1)
-    c_max = str(int(worksheet_check_C.acell('A1').value) + 1)
-    d_max = str(int(worksheet_check_D.acell('A1').value) + 1)
     # 범위 내 셀 값 로딩
-    range_list = worksheet_list.range('D2:D' + cell_max)
-    team_a_list = worksheet_check_A.range('C3:C' + a_max)
-    team_b_list = worksheet_check_B.range('C3:C' + b_max)
-    team_c_list = worksheet_check_C.range('C3:C' + c_max)
-    team_d_list = worksheet_check_D.range('C3:C' + d_max)
     name = ctx.author.display_name.split('[')
 
     if str(ctx.message.channel) == 'team-a-출석조사':
         if "TEAM_A" in role_names:  # A팀 역할 있는지 체크
+            a_max = str(int(worksheet_check_A.acell('A1').value) + 1)
+            team_a_list = worksheet_check_A.range('C3:C' + a_max)
             for i, cell in enumerate(team_a_list):  # 1팀 1경기
                 if str(cell.value) == str(ctx.author.id):
                     temp = i + 3
@@ -1051,7 +1043,9 @@ async def 출석(ctx, game):
         else:
             await ctx.send(content=f"```{ctx.author.display_name} 님은 TEAM_A 소속이 아닙니다.```")
     elif str(ctx.message.channel) == 'team-b-출석조사':
-        if "TEAM_B" in role_names:  # A팀 역할 있는지 체크
+        if "TEAM_B" in role_names:  # B팀 역할 있는지 체크
+            b_max = str(int(worksheet_check_B.acell('A1').value) + 1)
+            team_b_list = worksheet_check_B.range('C3:C' + b_max)
             for i, cell in enumerate(team_b_list):  # 1팀 1경기
                 if str(cell.value) == str(ctx.author.id):
                     temp = i + 3
@@ -1077,7 +1071,9 @@ async def 출석(ctx, game):
             await ctx.send(content=f"```{ctx.author.display_name} 님은 TEAM_B 소속이 아닙니다.```")
 
     elif str(ctx.message.channel) == 'team-c-출석조사':
-        if "TEAM_C" in role_names:  # A팀 역할 있는지 체크
+        if "TEAM_C" in role_names:  # C팀 역할 있는지 체크
+            c_max = str(int(worksheet_check_C.acell('A1').value) + 1)
+            team_c_list = worksheet_check_C.range('C3:C' + c_max)
             for i, cell in enumerate(team_c_list):  # 1팀 1경기
                 if str(cell.value) == str(ctx.author.id):
                     temp = i + 3
@@ -1104,6 +1100,8 @@ async def 출석(ctx, game):
 
     elif str(ctx.message.channel) == 'team-d-출석조사':
         if "TEAM_D" in role_names:  # A팀 역할 있는지 체크
+            d_max = str(int(worksheet_check_D.acell('A1').value) + 1)
+            team_d_list = worksheet_check_D.range('C3:C' + d_max)
             for i, cell in enumerate(team_d_list):  # 1팀 1경기
                 if str(cell.value) == str(ctx.author.id):
                     temp = i + 3
