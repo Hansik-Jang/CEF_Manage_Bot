@@ -419,8 +419,6 @@ async def 리셋(ctx):
                     key1 = 0
             await ctx.send(content=f"```{ctx.author.display_name}님의 닉네임, 주포지션, 부포지션이 재업데이트 되었습니다.\n"
                                    f"자세한 사항은 %시트링크 명령어를 입력하여, 시트에서 확인해주세요.```")
-
-
         else:
             a = temp[1].split(']')
             jupo = a[0]
@@ -516,7 +514,7 @@ async def 부포변경(ctx, *, text):
 async def 색깔(ctx):
     color_list = ["빨강", "노랑", "파랑", "보라", "검정", "흰색"]
     color = random.choice(color_list)
-    await ctx.send(color)
+    await ctx.send(content=f"{color}")
 
 
 # 부 포지션 삭제
@@ -1754,6 +1752,25 @@ async def 출석공지(ctx):
     else:
         await ctx.send("```해당 명령어는 스태프만 사용 가능합니다.```")
 
+
+@bot.command()
+async def 종료공지(ctx):
+    emojis = ""
+    A_check_channel = bot.get_channel(800389947118583809)
+    B_check_channel = bot.get_channel(800390071797809202)
+    C_check_channel = bot.get_channel(800390119907393577)
+    D_check_channel = bot.get_channel(798834713846218762)
+    emoji = "<:__:708304488217313371>"
+    for i in range(0, 10):
+        emojis = emojis + emoji
+    await A_check_channel.send(content=f"{emojis}"
+                                       f"리그 종료 시간 23시 입니다.")
+    await B_check_channel.send(content=f"{emojis}"
+                                       f"리그 종료 시간 23시 입니다.")
+    await C_check_channel.send(content=f"{emojis}"
+                                       f"리그 종료 시간 23시 입니다.")
+    await D_check_channel.send(content=f"{emojis}"
+                                       f"리그 종료 시간 23시 입니다.")
 
 @bot.event
 async def on_reaction_add(reaction, user):
