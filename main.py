@@ -43,27 +43,31 @@ async def on_ready():
 
 
 @bot.command()
-async def 테스트(ctx):
-    a_nick_temp = []
-    a_list_temp = []
-    check_a_list = []
-    a_max = str(int(worksheet_check_A.acell('A1').value) + 1)
-    a_nick_list = worksheet_check_A.range('B3:B' + a_max)
-    a_list = worksheet_check_A.range('E3:G' + a_max)
-    temp = a_nick_list + a_list
-    for i, cell in enumerate(a_nick_list):
-        a_nick_temp.append(cell.value)
-    for i, cell in enumerate(a_list):
-        a_list_temp.append(cell.value)
-    print(temp)
-    print(len(a_nick_temp))
-    print(len(a_list_temp))
-    print(a_nick_temp)
-    print(a_list_temp)
-    print(check_a_list)
-    for i in range(1, len(a_nick_temp) + 2):
-        text = a_nick_temp[i] + "\t\t\t" + a_list_temp[3*i-2] + "\t" + a_list_temp[3*i-1] + "\t" + a_list_temp[3*i]
-        check_a_list.append(text)
+async def 테스트(ctx, search_name):
+    key = 0
+    role_names = [role.name for role in ctx.author.roles]
+    # 범위(체크)
+    cell_max = worksheet_list.acell('A1').value
+
+    # 범위 내 셀 값 로딩
+    range_list = worksheet_list.range('E2:E' + cell_max)
+    name = ctx.author.display_name.split('[')
+    check = 0
+    print(range_list)
+    # 스프레드 체크 및 업데이트
+    for i, cell in enumerate(range_list):
+        if str(cell.value) == str(search_name) or str(cell.value) == (str(search_name) + " "):
+            await ctx.send(content=f"```{search_name} 닉네임은 이미 사용 중입니다.```")
+            print(str(cell.value))
+            key = 1
+            break
+        else:
+            key = 0
+    if key == 0:
+        await ctx.send(content=f"```{search_name} 닉네임은 사용 가능합니다.```")
+
+    await ctx.message.delete()
+
 
 
 
@@ -257,15 +261,14 @@ async def 가입(ctx):
     key = 0
     now = datetime.datetime.now()
     now_time = now.strftime('%Y-%m-%d %H:%M:%S')
+    overlap_check = 0
     answer = 0
     # 범위(체크)
     cell_max = worksheet_list.acell('A1').value
-    join_max = worksheet_join.acell('A1').value
     cell_data = int(cell_max) + 1
     # 범위 내 셀 값 로딩
     range_list = worksheet_list.range('D2:D' + str(cell_data))
-    join_list = worksheet_join.range('D3:D' + str(join_max))
-
+    overlap_list = worksheet_list.range('E2:E' + str(cell_max))
     for cell in range_list:
         if str(cell.value) == str(ctx.author.id):
             join_key = 0
@@ -273,43 +276,67 @@ async def 가입(ctx):
         else:
             join_key = 1
 
-    for i, cell in enumerate(join_list):
-        if str(cell.value) == str(ctx.author.id):
-            temp = i + 2
-            q1 = worksheet_join.acell('F' + str(temp)).value
-            q2 = worksheet_join.acell('G' + str(temp)).value
-            answer = int(q1) + int(q2)
-            print(q1, q2, answer)
-
+    temp = ctx.author.display_name.split('[')
+    nickname = temp[0]
+    # 스프레드 체크 및 업데이트
+    for i, cell in enumerate(overlap_list):
+        if str(cell.value) == nickname or str(cell.value) == (nickname + " "):
+            overlap_check = 1
+            break
+        else:
+            overlap_check = 0
+    print(overlap_check)
     # 닉네임 양식 체크, 분리 및 시트 등록
     # answer == 3:
-    if join_key == 1:
-        temp = ctx.author.display_name.split('[')
-        nickname = temp[0]
-        if "," in ctx.author.display_name:
-            await ctx.send("```정확한 닉네임 양식을 지켜주세요\n"
-                           "주 포지션과 부 포지션의 구분은 '/'을 사용해주세요.\n"
-                           "해당 봇에서는 ','를 인식하지 않으며, 이는 봇 고장의 원인이 됩니다.\n"
-                           "닉네임 양식 : 닉네임[주포지션/부포지션] or 닉네임[주포지션]```")
-        elif "." in ctx.author.display_name:
-            await ctx.send("```정확한 닉네임 양식을 지켜주세요\n"
-                           "주 포지션과 부 포지션의 구분은 '/'을 사용해주세요.\n"
-                           "해당 봇에서는 '.'를 인식하지 않으며, 이는 봇 고장의 원인이 됩니다.\n"
-                           "닉네임 양식 : 닉네임[주포지션/부포지션] or 닉네임[주포지션]```")
-        elif "[" in ctx.author.display_name:
-            if '/' in temp[1]:
-                a = temp[1].split('/')
-                jupo = a[0]
-                b = a[1].split(']')
-                bupo = b[0]
-                if key == 0:
+    if overlap_check == 0:
+        if join_key == 1:
+            # 범위 내 셀 값 로딩
+            # 스프레드 체크 및 업데이트
+            if "," in ctx.author.display_name:
+                await ctx.send("```정확한 닉네임 양식을 지켜주세요\n"
+                               "주 포지션과 부 포지션의 구분은 '/'을 사용해주세요.\n"
+                               "해당 봇에서는 ','를 인식하지 않으며, 이는 봇 고장의 원인이 됩니다.\n"
+                               "닉네임 양식 : 닉네임[주포지션/부포지션] or 닉네임[주포지션]```")
+            elif "." in ctx.author.display_name:
+                await ctx.send("```정확한 닉네임 양식을 지켜주세요\n"
+                               "주 포지션과 부 포지션의 구분은 '/'을 사용해주세요.\n"
+                               "해당 봇에서는 '.'를 인식하지 않으며, 이는 봇 고장의 원인이 됩니다.\n"
+                               "닉네임 양식 : 닉네임[주포지션/부포지션] or 닉네임[주포지션]```")
+            elif "[" in ctx.author.display_name:
+                if '/' in temp[1]:
+                    a = temp[1].split('/')
+                    jupo = a[0]
+                    b = a[1].split(']')
+                    bupo = b[0]
+                    if key == 0:
+                        id_num = "" + str(ctx.author.id)
+                        worksheet_list.insert_row(
+                            ["", now_time, ctx.author.display_name, id_num, nickname, jupo, bupo, '무소속',
+                             '0000-00-00 00:00:00'], int(cell_max) + 1)
+                        worksheet_career.insert_row(
+                            ["", now_time, ctx.author.display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                             0, 0], int(cell_max) + 1)
+                        await ctx.send(content=f"```{ctx.author.display_name}님 정상 등록되었습니다.```")
+                        user = ctx.author
+                        role = get(ctx.guild.roles, name='신CEF')
+                        role2 = get(ctx.guild.roles, name='CEF')
+                        await user.add_roles(role)
+                        await user.add_roles(role2)
+                        channel = bot.get_channel(709025283306684457)
+                        await channel.send(content=f"{ctx.author.mention} 신규가입")
+                        channel2 = bot.get_channel(713717100769837126)
+                        await channel2.send(content=f"가입일자 : {now_time}\n"
+                                                    f"{ctx.author.mention}")
+                else:
+                    a = temp[1].split(']')
+                    jupo = a[0]
                     id_num = "" + str(ctx.author.id)
                     worksheet_list.insert_row(
-                        ["", now_time, ctx.author.display_name, id_num, nickname, jupo, bupo, '무소속',
+                        ["", now_time, ctx.author.display_name, id_num, nickname, jupo, '', '무소속',
                          '0000-00-00 00:00:00'], int(cell_max) + 1)
                     worksheet_career.insert_row(
-                        ["", now_time, ctx.author.display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         0, 0], int(cell_max) + 1)
+                        ["", now_time, ctx.author.display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0], int(cell_max) + 1)
                     await ctx.send(content=f"```{ctx.author.display_name}님 정상 등록되었습니다.```")
                     user = ctx.author
                     role = get(ctx.guild.roles, name='신CEF')
@@ -323,31 +350,15 @@ async def 가입(ctx):
                                                 f"{ctx.author.mention}")
 
             else:
-                a = temp[1].split(']')
-                jupo = a[0]
-                id_num = "" + str(ctx.author.id)
-                worksheet_list.insert_row(
-                    ["", now_time, ctx.author.display_name, id_num, nickname, jupo, '', '무소속',
-                     '0000-00-00 00:00:00'], int(cell_max) + 1)
-                worksheet_career.insert_row(
-                    ["", now_time, ctx.author.display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                     0], int(cell_max) + 1)
-                await ctx.send(content=f"```{ctx.author.display_name}님 정상 등록되었습니다.```")
-                user = ctx.author
-                role = get(ctx.guild.roles, name='신CEF')
-                role2 = get(ctx.guild.roles, name='CEF')
-                await user.add_roles(role)
-                await user.add_roles(role2)
-                channel = bot.get_channel(709025283306684457)
-                await channel.send(content=f"{ctx.author.mention} 신규가입")
-                channel2 = bot.get_channel(713717100769837126)
-                await channel2.send(content=f"가입일자 : {now_time}\n"
-                                            f"{ctx.author.mention}")
-
+                await ctx.send("```정확한 닉네임 양식을 지켜주세요\n닉네임 양식 : 닉네임[주포지션/부포지션] or 닉네임[주포지션]```")
         else:
-            await ctx.send("```정확한 닉네임 양식을 지켜주세요\n닉네임 양식 : 닉네임[주포지션/부포지션] or 닉네임[주포지션]```")
+            await ctx.send(content=f"{ctx.author.mention} 님은 이미 가입되었습니다.")
     else:
-        await ctx.send(content=f"{ctx.author.mention} 님은 이미 가입되었습니다.")
+        await ctx.send(content=f"{ctx.author.mention}\n"
+                               f"```해당 닉네임은 이미 사용 중입니다.\n"
+                               f"다른 닉네임으로 변경해주세요.\n"
+                               f"%검색 닉네임 명령어를 사용하여 사용하고 있는 닉네임을 검색할 수 있습니다.```")
+
     # answer == 2:
     #    await ctx.send("```'1번. 클럽원 간의 과도한 경쟁' 은 정답이 아닙니다.```")
     # elif answer == 4:
@@ -379,62 +390,97 @@ async def 탈퇴(ctx):
                                f"%가입 명령어를 사용해 스프레드 시트에 등록하거나\n"
                                f"%닉변 명령어를 사용해 닉네임을 업데이트해주세요.```")
 
+# 닉네임 검색
+@bot.command()
+async def 검색(ctx, nickname):
+    overlap_check = 0
+    # 범위(체크)
+    cell_max = worksheet_list.acell('A1').value
+    # 범위 내 셀 값 로딩
+    range_list = worksheet_list.range('D2:D' + cell_max)
+    overlap_list = worksheet_list.range('E2:E' + str(cell_max))
+    # 스프레드 체크 및 업데이트
+    for i, cell in enumerate(overlap_list):
+        if str(cell.value) == nickname or str(cell.value) == (nickname + " "):
+            overlap_check = 1
+            break
+        else:
+            overlap_check = 0
+    if overlap_check == 1:
+        await ctx.send(content=f"```검색한 닉네임 : {nickname}\n"
+                               f"해당 닉네임은 이미 사용 중이므로, 사용할 수 없습니다.```")
+    else:
+        await ctx.send(content=f"```검색한 닉네임 : {nickname}\n"
+                               f"해당 닉네임은 사용 가능합니다.```")
+
 # 닉네임, 주포, 부포 리셋
 @bot.command()
 async def 리셋(ctx):
-    key = 0
+    key1 = 0
     temp = ctx.author.display_name.split('[')
     nickname = temp[0]
     # 범위(체크)
     cell_max = worksheet_list.acell('A1').value
     # 범위 내 셀 값 로딩
     range_list = worksheet_list.range('D2:D' + cell_max)
-
-    if "," in ctx.author.display_name:
-        await ctx.send("```정확한 닉네임 양식을 지켜주세요\n"
-                       "주 포지션과 부 포지션의 구분은 '/'을 사용해주세요.\n"
-                       "해당 봇에서는 ','를 인식하지 않으며, 이는 봇 고장의 원인이 됩니다.\n"
-                       "닉네임 양식 : 닉네임[주포지션/부포지션] or 닉네임[주포지션]```")
-    elif "." in ctx.author.display_name:
-        await ctx.send("```정확한 닉네임 양식을 지켜주세요\n"
-                       "주 포지션과 부 포지션의 구분은 '/'을 사용해주세요.\n"
-                       "해당 봇에서는 '.'를 인식하지 않으며, 이는 봇 고장의 원인이 됩니다.\n"
-                       "닉네임 양식 : 닉네임[주포지션/부포지션] or 닉네임[주포지션]```")
-    elif "[" in ctx.author.display_name:
-        if '/' in temp[1]:
-            a = temp[1].split('/')
-            jupo = a[0]
-            b = a[1].split(']')
-            bupo = b[0]
-            for i, cell in enumerate(range_list):
-                if str(cell.value) == str(ctx.author.id):
-                    check = i + 2
-                    worksheet_list.update_acell('C' + str(check), ctx.author.display_name)
-                    worksheet_list.update_acell('E' + str(check), nickname)
-                    worksheet_list.update_acell('F' + str(check), jupo)
-                    worksheet_list.update_acell('G' + str(check), bupo)
-                    key1 = 1
-                    break
-                else:
-                    key1 = 0
-            await ctx.send(content=f"```{ctx.author.display_name}님의 닉네임, 주포지션, 부포지션이 재업데이트 되었습니다.\n"
-                                   f"자세한 사항은 %시트링크 명령어를 입력하여, 시트에서 확인해주세요.```")
+    overlap_list = worksheet_list.range('E2:E' + str(cell_max))
+    # 스프레드 체크 및 업데이트
+    for i, cell in enumerate(overlap_list):
+        if str(cell.value) == nickname or str(cell.value) == (nickname + " "):
+            overlap_check = 1
+            break
         else:
-            a = temp[1].split(']')
-            jupo = a[0]
-            for i, cell in enumerate(range_list):
-                if str(cell.value) == str(ctx.author.id):
-                    check = i + 2
-                    worksheet_list.update_acell('C' + str(check), ctx.author.display_name)
-                    worksheet_list.update_acell('E' + str(check), nickname)
-                    worksheet_list.update_acell('F' + str(check), jupo)
-                    worksheet_list.update_acell('G' + str(check), '')
-                    key1 = 1
-                    break
-                else:
-                    key1 = 0
-            await ctx.send(content=f"```{ctx.author.display_name}님의 닉네임, 주포지션, 부포지션이 재업데이트 되었습니다.\n"
-                                   f"자세한 사항은 %시트링크 명령어를 입력하여, 시트에서 확인해주세요.```")
+            overlap_check = 0
+    if overlap_check == 0:
+        if "," in ctx.author.display_name:
+            await ctx.send("```정확한 닉네임 양식을 지켜주세요\n"
+                           "주 포지션과 부 포지션의 구분은 '/'을 사용해주세요.\n"
+                           "해당 봇에서는 ','를 인식하지 않으며, 이는 봇 고장의 원인이 됩니다.\n"
+                           "닉네임 양식 : 닉네임[주포지션/부포지션] or 닉네임[주포지션]```")
+        elif "." in ctx.author.display_name:
+            await ctx.send("```정확한 닉네임 양식을 지켜주세요\n"
+                           "주 포지션과 부 포지션의 구분은 '/'을 사용해주세요.\n"
+                           "해당 봇에서는 '.'를 인식하지 않으며, 이는 봇 고장의 원인이 됩니다.\n"
+                           "닉네임 양식 : 닉네임[주포지션/부포지션] or 닉네임[주포지션]```")
+        elif "[" in ctx.author.display_name:
+            if '/' in temp[1]:
+                a = temp[1].split('/')
+                jupo = a[0]
+                b = a[1].split(']')
+                bupo = b[0]
+                for i, cell in enumerate(range_list):
+                    if str(cell.value) == str(ctx.author.id):
+                        check = i + 2
+                        worksheet_list.update_acell('C' + str(check), ctx.author.display_name)
+                        worksheet_list.update_acell('E' + str(check), nickname)
+                        worksheet_list.update_acell('F' + str(check), jupo)
+                        worksheet_list.update_acell('G' + str(check), bupo)
+                        key1 = 1
+                        break
+                    else:
+                        key1 = 0
+                await ctx.send(content=f"```{ctx.author.display_name}님의 닉네임, 주포지션, 부포지션이 재업데이트 되었습니다.\n"
+                                       f"자세한 사항은 %시트링크 명령어를 입력하여, 시트에서 확인해주세요.```")
+            else:
+                a = temp[1].split(']')
+                jupo = a[0]
+                for i, cell in enumerate(range_list):
+                    if str(cell.value) == str(ctx.author.id):
+                        check = i + 2
+                        worksheet_list.update_acell('C' + str(check), ctx.author.display_name)
+                        worksheet_list.update_acell('E' + str(check), nickname)
+                        worksheet_list.update_acell('F' + str(check), jupo)
+                        worksheet_list.update_acell('G' + str(check), '')
+                        key1 = 1
+                        break
+                    else:
+                        key1 = 0
+                await ctx.send(content=f"```{ctx.author.display_name}님의 닉네임, 주포지션, 부포지션이 재업데이트 되었습니다.\n"
+                                       f"자세한 사항은 %시트링크 명령어를 입력하여, 시트에서 확인해주세요.```")
+    else:
+        await ctx.send(content=f"{ctx.author.mention}\n"
+                               f"```해당 닉네임은 이미 사용 중입니다.\n"
+                               f"다른 닉네임으로 변경해주세요.```")
     if key1 == 0:
         await ctx.send(content=f"```스프레드 시트 명단에서 {ctx.author.display_name}님의 고유 ID 번호를 검색할 수 없습니다.\n```")
 
@@ -565,50 +611,65 @@ async def 닉변(ctx):
     team_b_list = worksheet_check_B.range('C3:C' + b_max)
     team_c_list = worksheet_check_C.range('C3:C' + c_max)
     team_d_list = worksheet_check_D.range('C3:C' + d_max)
-    name = ctx.author.display_name.split('[')
+    temp = ctx.author.display_name.split('[')
+    nickname = temp[0]
     check = 0
+    overlap_list = worksheet_list.range('E2:E' + str(cell_max))
     # 스프레드 체크 및 업데이트
-    for i, cell in enumerate(range_list):
-        if str(cell.value) == str(ctx.author.id):
-            check = i + 2
-            ex_name = worksheet_list.acell('C' + str(check)).value
-            worksheet_list.update_acell('C' + str(check), ctx.author.display_name)
-            worksheet_list.update_acell('E' + str(check), str(name[0]))
-            worksheet_career.update_acell('C' + str(check), ctx.author.display_name)
-            worksheet_career.update_acell('E' + str(check), str(name[0]))
-            if "TEAM_A" in role_names:
-                for j, cell2 in enumerate(team_a_list):
-                    if str(cell2.value) == str(ctx.author.id):
-                        check = i + 3
-                        worksheet_check_A.update_acell('B' + str(check), ctx.author.display_name)
-                        break
-            elif "TEAM_B" in role_names:
-                for j, cell2 in enumerate(team_b_list):
-                    if str(cell2.value) == str(ctx.author.id):
-                        check = i + 3
-                        worksheet_check_B.update_acell('B' + str(check), ctx.author.display_name)
-                        break
-            elif "TEAM_C" in role_names:
-                for j, cell2 in enumerate(team_c_list):
-                    if str(cell2.value) == str(ctx.author.id):
-                        check = i + 3
-                        worksheet_check_C.update_acell('B' + str(check), ctx.author.display_name)
-                        break
-            elif "TEAM_D" in role_names:
-                for j, cell2 in enumerate(team_d_list):
-                    if str(cell2.value) == str(ctx.author.id):
-                        check = i + 3
-                        worksheet_check_D.update_acell('B' + str(check), ctx.author.display_name)
-                        break
-            key = 1
-            await ctx.send(
-                content=f"```닉네임 변경을 정상적으로 업데이트하였습니다.\n"
-                        f"이전 닉네임 : {ex_name} --> 현재 닉네임 : {name[0]}\n"
-                        f"디스코드 내 닉네임은 직접 수정해주세요.\n"
-                        f"닉네임변경 명령어는 디스코드 내 닉네임을 먼저 수정한 후 사용해야 정상적으로 처리됩니다.```")
+    for i, cell in enumerate(overlap_list):
+        if str(cell.value) == nickname or str(cell.value) == (nickname + " "):
+            overlap_check = 1
             break
         else:
-            key = 0
+            overlap_check = 0
+
+    # 스프레드 체크 및 업데이트
+    if overlap_check == 0:
+        for i, cell in enumerate(range_list):
+            if str(cell.value) == str(ctx.author.id):
+                check = i + 2
+                ex_name = worksheet_list.acell('C' + str(check)).value
+                worksheet_list.update_acell('C' + str(check), ctx.author.display_name)
+                worksheet_list.update_acell('E' + str(check), str(nickname))
+                worksheet_career.update_acell('C' + str(check), ctx.author.display_name)
+                worksheet_career.update_acell('E' + str(check), str(nickname))
+                if "TEAM_A" in role_names:
+                    for j, cell2 in enumerate(team_a_list):
+                        if str(cell2.value) == str(ctx.author.id):
+                            check = i + 3
+                            worksheet_check_A.update_acell('B' + str(check), ctx.author.display_name)
+                            break
+                elif "TEAM_B" in role_names:
+                    for j, cell2 in enumerate(team_b_list):
+                        if str(cell2.value) == str(ctx.author.id):
+                            check = i + 3
+                            worksheet_check_B.update_acell('B' + str(check), ctx.author.display_name)
+                            break
+                elif "TEAM_C" in role_names:
+                    for j, cell2 in enumerate(team_c_list):
+                        if str(cell2.value) == str(ctx.author.id):
+                            check = i + 3
+                            worksheet_check_C.update_acell('B' + str(check), ctx.author.display_name)
+                            break
+                elif "TEAM_D" in role_names:
+                    for j, cell2 in enumerate(team_d_list):
+                        if str(cell2.value) == str(ctx.author.id):
+                            check = i + 3
+                            worksheet_check_D.update_acell('B' + str(check), ctx.author.display_name)
+                            break
+                key = 1
+                await ctx.send(
+                    content=f"```닉네임 변경을 정상적으로 업데이트하였습니다.\n"
+                            f"이전 닉네임 : {ex_name} --> 현재 닉네임 : {nickname}\n"
+                            f"디스코드 내 닉네임은 직접 수정해주세요.\n"
+                            f"닉네임변경 명령어는 디스코드 내 닉네임을 먼저 수정한 후 사용해야 정상적으로 처리됩니다.```")
+                break
+            else:
+                key = 0
+    else:
+        await ctx.send(content=f"{ctx.author.mention}\n"
+                               f"```해당 닉네임은 이미 사용 중입니다.\n"
+                               f"다른 닉네임으로 변경해주세요.```")
 
     if key == 0:
         await ctx.send(content=f"```스프레드 시트에서 {ctx.author.display_name}님의 이름을 검색할 수 없습니다.\n"
@@ -1763,13 +1824,13 @@ async def 종료공지(ctx):
     emoji = "<:__:708304488217313371>"
     for i in range(0, 10):
         emojis = emojis + emoji
-    await A_check_channel.send(content=f"{emojis}"
+    await A_check_channel.send(content=f"{emojis}\n"
                                        f"리그 종료 시간 23시 입니다.")
-    await B_check_channel.send(content=f"{emojis}"
+    await B_check_channel.send(content=f"{emojis}\n"
                                        f"리그 종료 시간 23시 입니다.")
-    await C_check_channel.send(content=f"{emojis}"
+    await C_check_channel.send(content=f"{emojis}\n"
                                        f"리그 종료 시간 23시 입니다.")
-    await D_check_channel.send(content=f"{emojis}"
+    await D_check_channel.send(content=f"{emojis}\n"
                                        f"리그 종료 시간 23시 입니다.")
 
 @bot.event
