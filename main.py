@@ -812,6 +812,7 @@ async def 커리어(ctx, text, member: discord.Member):
                     await ctx.send(content=f"```cs\n"
                                            f"{name[0]}님의 선수 커리어가 정상적으로 업데이트되었습니다.\n"
                                            f"이전 선수 우승횟수 : {before} --> 현재 선수 우승횟수 : {now}```")
+                    break
                 else:
                     key = 0
 
@@ -825,8 +826,9 @@ async def 커리어(ctx, text, member: discord.Member):
                     worksheet_career.update_acell('G' + str(check), str(now))
                     key = 1
                     await ctx.send(content=f"```cs\n"
-                                           f"{name[0]}님의 선수 커리어가 정상적으로 업데이트되었습니다.\n"
-                                           f"이전 선수 우승횟수 : {before} --> 현재 선수 우승횟수 : {now}```")
+                                           f"{name[0]}님의 주장 커리어가 정상적으로 업데이트되었습니다.\n"
+                                           f"이전 주장 우승횟수 : {before} --> 현재 주장 우승횟수 : {now}```")
+                    break
                 else:
                     key = 0
         if key == 0:
@@ -1262,6 +1264,7 @@ async def 출석(ctx, game):
             await ctx.send(content=f"```{ctx.author.display_name} 님은 TEAM_D 소속이 아닙니다.```")
     else:
         await ctx.send("각 팀 출석조사 채널에 입력해주세요.")
+
 
 @bot.command()
 async def 출석취소(ctx, game):
