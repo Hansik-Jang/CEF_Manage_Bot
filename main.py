@@ -591,6 +591,9 @@ async def 부포삭제(ctx):
 # 닉네임 업데이트
 @bot.command()
 async def 닉변(ctx):
+    await ctx.send("'''현재 닉네임 변경 기간이 아닙니다.\n"
+                   "2월의 닉변 변경일은 2월 12일, 26일 입니다.")
+    '''
     key = 0
     role_names = [role.name for role in ctx.author.roles]
     # 범위(체크)
@@ -611,16 +614,16 @@ async def 닉변(ctx):
     check = 0
     overlap_list = worksheet_list.range('E2:E' + str(cell_max))
     '''# 스프레드 체크 및 업데이트
-    for i, cell in enumerate(overlap_list):
-        if str(cell.value) == nickname or str(cell.value) == (nickname + " "):
-            temp_num = i + 2
-            if nickname == worksheet_list.acell('E'+ str(temp_num)).value):
-                continue
-            else:
-                overlap_check = 1
-                break
-        else:
-            overlap_check = 0
+    #for i, cell in enumerate(overlap_list):
+        #if str(cell.value) == nickname or str(cell.value) == (nickname + " "):
+            #temp_num = i + 2
+            #if nickname == worksheet_list.acell('E'+ str(temp_num)).value):
+                #continue
+            #else:
+                #overlap_check = 1
+                #break
+        #else:
+            #overlap_check = 0
     '''
     # 스프레드 체크 및 업데이트
     #if overlap_check == 0:
@@ -665,10 +668,10 @@ async def 닉변(ctx):
             break
         else:
             key = 0
-    '''else:
-        await ctx.send(content=f"{ctx.author.mention}\n"
-                               f"```해당 닉네임은 이미 사용 중입니다.\n"
-                               f"다른 닉네임으로 변경해주세요.```")'''
+    #else:
+        #await ctx.send(content=f"{ctx.author.mention}\n"
+                               #f"```해당 닉네임은 이미 사용 중입니다.\n"
+                               #f"다른 닉네임으로 변경해주세요.```")
 
     if key == 0:
         await ctx.send(content=f"```스프레드 시트에서 {ctx.author.display_name}님의 이름을 검색할 수 없습니다.\n"
@@ -676,7 +679,7 @@ async def 닉변(ctx):
                                f"%닉변 명령어를 사용해 닉네임을 업데이트해주세요.```")
 
     await ctx.message.delete()
-
+    '''
 
 # 역할 부여하기
 @bot.command()
