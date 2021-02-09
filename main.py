@@ -305,7 +305,7 @@ async def 가입(ctx):
                             ["", now_time, ctx.author.display_name, id_num, nickname, jupo, bupo, '무소속',
                              '0000-00-00 00:00:00'], int(cell_max) + 1)
                         worksheet_career.insert_row(
-                            ["", now_time, ctx.author.display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0], int(cell_max) + 1)
+                            ["", now_time, ctx.author.display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], int(cell_max) + 1)
                         await ctx.send(content=f"```{ctx.author.display_name}님 정상 등록되었습니다.```")
                         user = ctx.author
                         role = get(ctx.guild.roles, name='신CEF')
@@ -325,7 +325,7 @@ async def 가입(ctx):
                         ["", now_time, ctx.author.display_name, id_num, nickname, jupo, '', '무소속',
                          '0000-00-00 00:00:00'], int(cell_max) + 1)
                     worksheet_career.insert_row(
-                        ["", now_time, ctx.author.display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0], int(cell_max) + 1)
+                        ["", now_time, ctx.author.display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], int(cell_max) + 1)
                     await ctx.send(content=f"```{ctx.author.display_name}님 정상 등록되었습니다.```")
                     user = ctx.author
                     role = get(ctx.guild.roles, name='신CEF')
@@ -381,7 +381,7 @@ async def 탈퇴(ctx):
 
 # 닉네임 검색
 @bot.command()
-async def 검색(ctx, nickname):
+async def 검색(ctx, *, nickname):
     overlap_check = 0
     # 범위(체크)
     cell_max = worksheet_list.acell('A1').value
@@ -865,7 +865,9 @@ async def 내정보(ctx):
             to_df = worksheet_career.acell('J' + str(check)).value
             to_gk = worksheet_career.acell('K' + str(check)).value
             total_to = worksheet_career.acell('L' + str(check)).value
-            val = worksheet_career.acell('M' + str(check)).value
+            before_to = worksheet_career.acell('M' + str(check)).value
+            val = worksheet_career.acell('N' + str(check)).value
+            before_val = worksheet_career.acell('O' + str(check)).value
 
     if key == 1:
         if "/" in ctx.author.display_name:
@@ -889,6 +891,8 @@ async def 내정보(ctx):
                                               f"DF : {to_df} 회\n"
                                               f"GK : {to_gk} 회\n", inline=True)
             embed.add_field(name="발롱도르", value=f"{val} 회", inline=True)
+            embed.add_field(name="이전 커리어", value=f"토츠 : {before_to} 회\n"
+                                                 f"발롱도르 : {before_val} 회", inline=True)
             embed.set_footer(text="Copyright ⓒ 2020-2021 타임제이(TimeJ) in C.E.F All Right Reserved.")
 
             await ctx.send(embed=embed)
@@ -912,6 +916,8 @@ async def 내정보(ctx):
                                               f"DF : {to_df} 회\n"
                                               f"GK : {to_gk} 회\n", inline=True)
             embed.add_field(name="발롱도르", value=f"{val} 회", inline=True)
+            embed.add_field(name="이전 커리어", value=f"토츠 : {before_to} 회\n"
+                                                 f"발롱도르 : {before_val} 회", inline=True)
 
             embed.set_footer(text="Copyright ⓒ 2020-2021 타임제이(TimeJ) in C.E.F All Right Reserved.")
 
