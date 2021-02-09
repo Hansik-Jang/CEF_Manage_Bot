@@ -44,23 +44,7 @@ async def on_ready():
 
 @bot.command()
 async def 테스트(ctx):
-    display_name = ctx.author.display_name
-    temp1 = display_name.split('[')
-    nickname = temp1[0]
-    if '/' in display_name:
-        temp2 = temp1[1].split('/')
-        jupo = temp2[0]
-        temp3 = temp2[1].split(']')
-        bupo = temp3[0]
-    else:
-        temp2 = temp1[1].split(']')
-        jupo = temp2[0]
-        bupo = "없음"
-    print(display_name)
-    print(nickname)
-    print(jupo)
-    print(temp2)
-    print(bupo)
+    pass
 
 @bot.command()
 async def 테스트2(ctx):
@@ -853,79 +837,82 @@ async def 내정보(ctx):
     tots_list = ""
     check = 1
     # 스프레드 체크 및 업데이트
-    for i, cell in enumerate(range_list):
-        if str(cell.value) == str(ctx.author.id):
-            check = i + 2
-            key = 1
-            team = worksheet_list.acell('H' + str(check)).value
-            player_win = worksheet_career.acell('F' + str(check)).value
-            coach_win = worksheet_career.acell('G' + str(check)).value
-            to_fw = worksheet_career.acell('H' + str(check)).value
-            to_mf = worksheet_career.acell('I' + str(check)).value
-            to_df = worksheet_career.acell('J' + str(check)).value
-            to_gk = worksheet_career.acell('K' + str(check)).value
-            total_to = worksheet_career.acell('L' + str(check)).value
-            before_to = worksheet_career.acell('M' + str(check)).value
-            val = worksheet_career.acell('N' + str(check)).value
-            before_val = worksheet_career.acell('O' + str(check)).value
-
-    if key == 1:
-        if "/" in ctx.author.display_name:
-            temp = ctx.author.display_name.split('[')
-            nickname = temp[0]
-            a = temp[1].split('/')
-            jupo = a[0]
-            b = a[1].split(']')
-            bupo = b[0]
-
-            embed = discord.Embed(title=f"내 정보", description=f"{ctx.author.display_name} 님의 정보창", color=0xFF007F)
-            embed.add_field(name="닉네임", value=nickname, inline=True)
-            embed.add_field(name="주포지션", value=jupo, inline=True)
-            embed.add_field(name="부포지션", value=bupo, inline=True)
-            embed.add_field(name="소속팀", value=f"{team}", inline=True)
-            embed.add_field(name="선수 우승", value=f"{player_win} 회", inline=True)
-            embed.add_field(name="코치 우승", value=f"{coach_win} 회", inline=True)
-            embed.add_field(name="토츠", value=f"총 수상 횟수 : {total_to} 회\n"
-                                              f"FW : {to_fw} 회\n"
-                                              f"MF : {to_mf} 회\n"
-                                              f"DF : {to_df} 회\n"
-                                              f"GK : {to_gk} 회\n", inline=True)
-            embed.add_field(name="발롱도르", value=f"{val} 회", inline=True)
-            embed.add_field(name="이전 커리어", value=f"토츠 : {before_to} 회\n"
-                                                 f"발롱도르 : {before_val} 회", inline=True)
-            embed.set_footer(text="Copyright ⓒ 2020-2021 타임제이(TimeJ) in C.E.F All Right Reserved.")
-
-            await ctx.send(embed=embed)
-        else:
-            temp = ctx.author.display_name.split('[')
-            nickname = temp[0]
-            a = temp[1].split(']')
-            jupo = a[0]
-            bupo = "없음"
-
-            embed = discord.Embed(title=f"내 정보", description=f"{ctx.author.display_name} 님의 정보창", color=0xFF007F)
-            embed.add_field(name="닉네임", value=nickname, inline=True)
-            embed.add_field(name="주포지션", value=jupo, inline=True)
-            embed.add_field(name="부포지션", value="없음", inline=True)
-            embed.add_field(name="소속팀", value=f"{team}", inline=True)
-            embed.add_field(name="선수 우승", value=f"{player_win} 회", inline=True)
-            embed.add_field(name="코치 우승", value=f"{coach_win} 회", inline=True)
-            embed.add_field(name="토츠", value=f"총 수상 횟수 : {total_to} 회\n"
-                                              f"FW : {to_fw} 회\n"
-                                              f"MF : {to_mf} 회\n"
-                                              f"DF : {to_df} 회\n"
-                                              f"GK : {to_gk} 회\n", inline=True)
-            embed.add_field(name="발롱도르", value=f"{val} 회", inline=True)
-            embed.add_field(name="이전 커리어", value=f"토츠 : {before_to} 회\n"
-                                                 f"발롱도르 : {before_val} 회", inline=True)
-
-            embed.set_footer(text="Copyright ⓒ 2020-2021 타임제이(TimeJ) in C.E.F All Right Reserved.")
-
-            await ctx.send(embed=embed)
+    if str(ctx.message.channel) != "내정보-열람실📜":
+        await ctx.send("내정보-열람실📜 채널에서 사용해주세요.")
     else:
-        await ctx.send(content=f"```스프레드 시트에서 {ctx.author.display_name}님의 이름을 검색할 수 없습니다.\n"
-                               f"%가입 명령어를 사용해 스프레드 시트에 등록하거나\n"
-                               f"%닉변 명령어를 사용해 닉네임을 업데이트해주세요.```")
+        for i, cell in enumerate(range_list):
+            if str(cell.value) == str(ctx.author.id):
+                check = i + 2
+                key = 1
+                team = worksheet_list.acell('H' + str(check)).value
+                player_win = worksheet_career.acell('F' + str(check)).value
+                coach_win = worksheet_career.acell('G' + str(check)).value
+                to_fw = worksheet_career.acell('H' + str(check)).value
+                to_mf = worksheet_career.acell('I' + str(check)).value
+                to_df = worksheet_career.acell('J' + str(check)).value
+                to_gk = worksheet_career.acell('K' + str(check)).value
+                total_to = worksheet_career.acell('L' + str(check)).value
+                before_to = worksheet_career.acell('M' + str(check)).value
+                val = worksheet_career.acell('N' + str(check)).value
+                before_val = worksheet_career.acell('O' + str(check)).value
+
+        if key == 1:
+            if "/" in ctx.author.display_name:
+                temp = ctx.author.display_name.split('[')
+                nickname = temp[0]
+                a = temp[1].split('/')
+                jupo = a[0]
+                b = a[1].split(']')
+                bupo = b[0]
+
+                embed = discord.Embed(title=f"내 정보", description=f"{ctx.author.display_name} 님의 정보창", color=0xFF007F)
+                embed.add_field(name="닉네임", value=nickname, inline=True)
+                embed.add_field(name="주포지션", value=jupo, inline=True)
+                embed.add_field(name="부포지션", value=bupo, inline=True)
+                embed.add_field(name="소속팀", value=f"{team}", inline=True)
+                embed.add_field(name="선수 우승", value=f"{player_win} 회", inline=True)
+                embed.add_field(name="코치 우승", value=f"{coach_win} 회", inline=True)
+                embed.add_field(name="토츠", value=f"총 수상 횟수 : {total_to} 회\n"
+                                                  f"FW : {to_fw} 회\n"
+                                                  f"MF : {to_mf} 회\n"
+                                                  f"DF : {to_df} 회\n"
+                                                  f"GK : {to_gk} 회\n", inline=True)
+                embed.add_field(name="발롱도르", value=f"{val} 회", inline=True)
+                embed.add_field(name="이전 커리어", value=f"토츠 : {before_to} 회\n"
+                                                     f"발롱도르 : {before_val} 회", inline=True)
+                embed.set_footer(text="Copyright ⓒ 2020-2021 타임제이(TimeJ) in C.E.F All Right Reserved.")
+
+                await ctx.send(embed=embed)
+            else:
+                temp = ctx.author.display_name.split('[')
+                nickname = temp[0]
+                a = temp[1].split(']')
+                jupo = a[0]
+                bupo = "없음"
+
+                embed = discord.Embed(title=f"내 정보", description=f"{ctx.author.display_name} 님의 정보창", color=0xFF007F)
+                embed.add_field(name="닉네임", value=nickname, inline=True)
+                embed.add_field(name="주포지션", value=jupo, inline=True)
+                embed.add_field(name="부포지션", value="없음", inline=True)
+                embed.add_field(name="소속팀", value=f"{team}", inline=True)
+                embed.add_field(name="선수 우승", value=f"{player_win} 회", inline=True)
+                embed.add_field(name="코치 우승", value=f"{coach_win} 회", inline=True)
+                embed.add_field(name="토츠", value=f"총 수상 횟수 : {total_to} 회\n"
+                                                  f"FW : {to_fw} 회\n"
+                                                  f"MF : {to_mf} 회\n"
+                                                  f"DF : {to_df} 회\n"
+                                                  f"GK : {to_gk} 회\n", inline=True)
+                embed.add_field(name="발롱도르", value=f"{val} 회", inline=True)
+                embed.add_field(name="이전 커리어", value=f"토츠 : {before_to} 회\n"
+                                                     f"발롱도르 : {before_val} 회", inline=True)
+
+                embed.set_footer(text="Copyright ⓒ 2020-2021 타임제이(TimeJ) in C.E.F All Right Reserved.")
+
+                await ctx.send(embed=embed)
+        else:
+            await ctx.send(content=f"```스프레드 시트에서 {ctx.author.display_name}님의 이름을 검색할 수 없습니다.\n"
+                                   f"%가입 명령어를 사용해 스프레드 시트에 등록하거나\n"
+                                   f"%닉변 명령어를 사용해 닉네임을 업데이트해주세요.```")
 
 
 @bot.command()
