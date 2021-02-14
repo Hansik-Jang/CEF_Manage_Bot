@@ -23,6 +23,14 @@ worksheet_check_A = sh.worksheet('출첵A')
 worksheet_check_B = sh.worksheet('출첵B')
 worksheet_check_C = sh.worksheet('출첵C')
 worksheet_check_D = sh.worksheet('출첵D')
+a_team_chat_id = 809757503671500801
+b_team_chat_id = 809757891187179540
+c_team_chat_id = 809758493723721760
+d_team_chat_id = 809758983165968384
+a_check_channel_id = 809810583033348116
+b_check_channel_id = 809758372374642718
+c_check_channel_id = 809758802831212544
+d_check_channel_id = 809759031308714024
 
 bot = commands.Bot(command_prefix="%")
 team = "무소속"
@@ -44,7 +52,8 @@ async def on_ready():
 
 @bot.command()
 async def 테스트(ctx):
-    pass
+     channel = bot.get_channel(784477701443420200)
+     await channel.send("테스트")
 
 @bot.command()
 async def 테스트2(ctx):
@@ -653,7 +662,7 @@ async def 닉변(ctx):
 
                 await ctx.send(
                     content=f"```닉네임 변경을 정상적으로 업데이트하였습니다.\n"
-                            f"이전 닉네임 : {ex_name[0]} --> 현재 닉네임 : {nickname}\n"
+                            f"이전 닉네임 : {ex_name} --> 현재 닉네임 : {nickname}\n"
                             f"디스코드 내 닉네임은 직접 수정해주세요.\n"
                             f"닉네임변경 명령어는 디스코드 내 닉네임을 먼저 수정한 후 사용해야 정상적으로 처리됩니다.```")
                 break
@@ -1669,10 +1678,10 @@ async def 출석결과(ctx, team_name, match_num):
 @bot.command()
 async def 출석초기화(ctx):
     role_names = [role.name for role in ctx.author.roles]
-    A_check_channel = bot.get_channel(800389977472237618)
-    B_check_channel = bot.get_channel(800390440145649664)
-    C_check_channel = bot.get_channel(800390149904007188)
-    D_check_channel = bot.get_channel(798834938874560552)
+    A_check_channel = bot.get_channel(a_check_channel_id)
+    B_check_channel = bot.get_channel(b_check_channel_id)
+    C_check_channel = bot.get_channel(c_check_channel_id)
+    D_check_channel = bot.get_channel(d_check_channel_id)
     if '스태프' in role_names:
         # 범위(체크)
         a_max = str(int(worksheet_check_A.acell('A1').value) + 1)
@@ -1712,10 +1721,10 @@ async def 출석공지(ctx):
     B_role = get(ctx.guild.roles, name='TEAM_B')
     C_role = get(ctx.guild.roles, name='TEAM_C')
     D_role = get(ctx.guild.roles, name='TEAM_D')
-    A_check_channel = bot.get_channel(800389977472237618)
-    B_check_channel = bot.get_channel(800390440145649664)
-    C_check_channel = bot.get_channel(800390149904007188)
-    D_check_channel = bot.get_channel(798834938874560552)
+    A_check_channel = bot.get_channel(a_check_channel_id)
+    B_check_channel = bot.get_channel(b_check_channel_id)
+    C_check_channel = bot.get_channel(c_check_channel_id)
+    D_check_channel = bot.get_channel(d_check_channel_id)
 
     if '스태프' in role_names:
         await A_check_channel.send(content=f"{A_role.mention}\n"
@@ -1749,21 +1758,24 @@ async def 출석공지(ctx):
 @bot.command()
 async def 종료공지(ctx):
     emojis = ""
-    A_check_channel = bot.get_channel(800389947118583809)
-    B_check_channel = bot.get_channel(800390071797809202)
-    C_check_channel = bot.get_channel(800390119907393577)
-    D_check_channel = bot.get_channel(798834713846218762)
+    a_check_channel = bot.get_channel(a_team_chat_id)
+    b_check_channel = bot.get_channel(b_team_chat_id)
+    c_check_channel = bot.get_channel(c_team_chat_id)
+    d_check_channel = bot.get_channel(d_team_chat_id)
     emoji = "<:__:708304488217313371>"
     for i in range(0, 10):
         emojis = emojis + emoji
-    await A_check_channel.send(content=f"{emojis}\n"
-                                       f"리그 종료 시간 23시 입니다.")
-    await B_check_channel.send(content=f"{emojis}\n"
-                                       f"리그 종료 시간 23시 입니다.")
-    await C_check_channel.send(content=f"{emojis}\n"
-                                       f"리그 종료 시간 23시 입니다.")
-    await D_check_channel.send(content=f"{emojis}\n"
-                                       f"리그 종료 시간 23시 입니다.")
+    await a_check_channel.send(content=f"{emojis}\n")
+    await a_check_channel.send("```리그 종료 시간 23시 입니다.```")
+
+    await b_check_channel.send(content=f"{emojis}\n")
+    await b_check_channel.send("```리그 종료 시간 23시 입니다.```")
+
+    await c_check_channel.send(content=f"{emojis}\n")
+    await c_check_channel.send("```리그 종료 시간 23시 입니다.```")
+
+    await d_check_channel.send(content=f"{emojis}\n")
+    await d_check_channel.send("```리그 종료 시간 23시 입니다.```")
 
 @bot.event
 async def on_reaction_add(reaction, user):
