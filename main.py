@@ -9,8 +9,9 @@ from discord.ext import commands
 from discord.utils import get
 from PIL import Image, ImageDraw, ImageFont
 from oauth2client.service_account import ServiceAccountCredentials
-import pytesseract
 import gspread
+import fun
+
 gc = gspread.service_account(filename='credentials.json')
 sh = gc.open_by_key('1552A1axMJDfxN7kv1TyohmJ3VqKNa7mBeQstHoIRpUQ')
 # sh2 = gc.open_by_key('1OP8XMpM93DPScaHX9hGtukf-qaZyalVgzhF--8i2e7')
@@ -18,18 +19,12 @@ worksheet_list = sh.worksheet('명단')
 worksheet_join = sh.worksheet('가입')
 worksheet_left = sh.worksheet('탈퇴')
 worksheet_career = sh.worksheet('경력')
+worksheet_info = sh.worksheet('팀정보')
 worksheet_check_A = sh.worksheet('출첵A')
 worksheet_check_B = sh.worksheet('출첵B')
 worksheet_check_C = sh.worksheet('출첵C')
 worksheet_check_D = sh.worksheet('출첵D')
-a_team_chat_id = 844177788201992212
-b_team_chat_id = 844177933806338068
-c_team_chat_id = 844177647063007262
-d_team_chat_id = 809758983165968384
-a_check_channel_id = 844177517761527868
-b_check_channel_id = 830808364307972146
-c_check_channel_id = 844177686321430548
-d_check_channel_id = 809759031308714024
+
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="%", intents=intents)
@@ -292,7 +287,7 @@ async def 가입(ctx):
                             ["", now_time, display_name, id_num, nickname, jupo, bupo, '무소속',
                              '0000-00-00 00:00:00'], int(cell_max) + 1)
                         worksheet_career.insert_row(
-                            ["", now_time, display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], int(cell_max) + 1)
+                            ["", now_time, display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ], int(cell_max) + 1)
                         await ctx.send(content=f"```{ctx.author.display_name}님 정상 등록되었습니다.```")
                         user = ctx.author
                         role = get(ctx.guild.roles, name='CEF')
@@ -313,7 +308,7 @@ async def 가입(ctx):
                         ["", now_time, display_name, id_num, nickname, jupo, '', '무소속',
                          '0000-00-00 00:00:00'], int(cell_max) + 1)
                     worksheet_career.insert_row(
-                        ["", now_time, display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], int(cell_max) + 1)
+                        ["", now_time, display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0], int(cell_max) + 1)
                     await ctx.send(content=f"```{ctx.author.display_name}님 정상 등록되었습니다.```")
                     user = ctx.author
                     role = get(ctx.guild.roles, name='CEF')
@@ -1790,6 +1785,10 @@ async def 출석결과(ctx, team_name, match_num):
 @bot.command()
 async def 출석초기화(ctx):
     role_names = [role.name for role in ctx.author.roles]
+    a_check_channel_id = get(ctx.guild.channels, name='team-a-출석조사')
+    b_check_channel_id = get(ctx.guild.channels, name='team-b-출석조사')
+    c_check_channel_id = get(ctx.guild.channels, name='team-c-출석조사')
+    d_check_channel_id = get(ctx.guild.channels, name='team-d-출석조사')
     A_check_channel = bot.get_channel(a_check_channel_id)
     B_check_channel = bot.get_channel(b_check_channel_id)
     C_check_channel = bot.get_channel(c_check_channel_id)
@@ -1833,6 +1832,10 @@ async def 출석공지(ctx):
     B_role = get(ctx.guild.roles, name='TEAM_B')
     C_role = get(ctx.guild.roles, name='TEAM_C')
     D_role = get(ctx.guild.roles, name='TEAM_D')
+    a_check_channel_id = get(ctx.guild.channels, name='team-a-출석조사')
+    b_check_channel_id = get(ctx.guild.channels, name='team-b-출석조사')
+    c_check_channel_id = get(ctx.guild.channels, name='team-c-출석조사')
+    d_check_channel_id = get(ctx.guild.channels, name='team-d-출석조사')
     A_check_channel = bot.get_channel(a_check_channel_id)
     B_check_channel = bot.get_channel(b_check_channel_id)
     C_check_channel = bot.get_channel(c_check_channel_id)
@@ -1870,6 +1873,10 @@ async def 출석공지(ctx):
 @bot.command()
 async def 종료공지(ctx):
     emojis = ""
+    a_team_chat_id = get(ctx.guild.channels, name='team-a-팀채팅')
+    b_team_chat_id = get(ctx.guild.channels, name='team-b-팀채팅')
+    c_team_chat_id = get(ctx.guild.channels, name='team-c-팀채팅')
+    d_team_chat_id = get(ctx.guild.channels, name='team-d-팀채팅')
     a_check_channel = bot.get_channel(a_team_chat_id)
     b_check_channel = bot.get_channel(b_team_chat_id)
     c_check_channel = bot.get_channel(c_team_chat_id)
@@ -1895,20 +1902,20 @@ async def 리그초기화(ctx):
     # --------------------------------------
     # 리그 역할 초기화
     roleli = []
-    role_names = ["TEAM_A", "TEAM_B", "TEAM_C", "TEAM_D"]
+    role_names = ["TEAM_A", "TEAM_B", "TEAM_C", "TEAM_D", "A Coach", "B Coach", "C Coach", "D Coach"]
     for rolename in role_names:
         roleli.append(get(ctx.guild.roles, name=rolename))
     for role in roleli:
         for member in role.members:
             await member.remove_roles(role)
-            #await ctx.send(content=f"{member.display_name} - {role} 제거")       메시지 닉네임 출력
+            await ctx.send(content=f"{member.display_name} - {role} 제거")      # 메시지 닉네임 출력
             #await ctx.send(content=f"{member.mention} - {role} 제거")            메시지 멘션 출력
     # --------------------------------------
     # 출석 체크 시트 초기화
-    worksheet_check_A.delete_rows(3, 100)
-    worksheet_check_B.delete_rows(3, 100)
-    worksheet_check_C.delete_rows(3, 100)
-    worksheet_check_D.delete_rows(3, 100)
+    worksheet_check_A.delete_rows(3, 30)
+    worksheet_check_B.delete_rows(3, 30)
+    worksheet_check_C.delete_rows(3, 30)
+    worksheet_check_D.delete_rows(3, 30)
     # --------------------------------------
     # 명단 시트 - 소속 변경
     max = worksheet_list.acell('A1').value
@@ -1974,25 +1981,25 @@ async def 리그초기화(ctx):
     await teamB_team_tatic.delete()
     #  - 선발명단
     teamB_team_lineup = get(ctx.guild.channels, name='team-b-선발명단')
-    teamB_team_lineup_temp = teamB_team_chat.overwrites
+    teamB_team_lineup_temp = teamB_team_lineup.overwrites
     temp = await ctx.guild.create_text_channel(name='team-b-선발명단', category=categoryB)
     await temp.edit(overwrites=teamB_team_lineup_temp)
     await teamB_team_lineup.delete()
     #  - 출석조사
     teamB_team_check = get(ctx.guild.channels, name='team-b-출석조사')
-    teamB_team_check_temp = teamB_team_chat.overwrites
+    teamB_team_check_temp = teamB_team_check.overwrites
     temp = await ctx.guild.create_text_channel(name='team-b-출석조사', category=categoryB)
     await temp.edit(overwrites=teamB_team_check_temp)
     await teamB_team_check.delete()
     #  - 불참-인원관리
     teamB_team_out = get(ctx.guild.channels, name='불참-인원-관리')
-    teamB_team_out_temp = teamB_team_chat.overwrites
+    teamB_team_out_temp = teamB_team_out.overwrites
     temp = await ctx.guild.create_text_channel(name='불참-인원-관리', category=categoryB)
     await temp.edit(overwrites=teamB_team_out_temp)
     await teamB_team_out.delete()
     #  - 주장-토크
     teamB_team_coach = get(ctx.guild.channels, name='주장-토크')
-    teamB_team_coach_temp = teamB_team_chat.overwrites
+    teamB_team_coach_temp = teamB_team_coach.overwrites
     temp = await ctx.guild.create_text_channel(name='주장-토크', category=categoryB)
     await temp.edit(overwrites=teamB_team_coach_temp)
     await teamB_team_coach.delete()
@@ -2013,32 +2020,140 @@ async def 리그초기화(ctx):
     await teamC_team_tatic.delete()
     #  - 선발명단
     teamC_team_lineup = get(ctx.guild.channels, name='team-c-선발명단')
-    teamC_team_lineup_temp = teamC_team_chat.overwrites
+    teamC_team_lineup_temp = teamC_team_lineup.overwrites
     temp = await ctx.guild.create_text_channel(name='team-c-선발명단', category=categoryB)
     await temp.edit(overwrites=teamC_team_lineup_temp)
     await teamC_team_lineup.delete()
     #  - 출석조사
     teamC_team_check = get(ctx.guild.channels, name='team-c-출석조사')
-    teamC_team_check_temp = teamC_team_chat.overwrites
+    teamC_team_check_temp = teamC_team_check.overwrites
     temp = await ctx.guild.create_text_channel(name='team-c-출석조사', category=categoryB)
     await temp.edit(overwrites=teamC_team_check_temp)
     await teamC_team_check.delete()
     #  - 불참-인원관리
     teamC_team_out = get(ctx.guild.channels, name='불참-인원-관리')
-    teamC_team_out_temp = teamC_team_chat.overwrites
+    teamC_team_out_temp = teamC_team_out.overwrites
     temp = await ctx.guild.create_text_channel(name='불참-인원-관리', category=categoryB)
     await temp.edit(overwrites=teamC_team_out_temp)
     await teamC_team_out.delete()
     #  - 주장-토크
     teamC_team_coach = get(ctx.guild.channels, name='주장-토크')
-    teamC_team_coach_temp = teamC_team_chat.overwrites
+    teamC_team_coach_temp = teamC_team_coach.overwrites
     temp = await ctx.guild.create_text_channel(name='주장-토크', category=categoryB)
     await temp.edit(overwrites=teamC_team_coach_temp)
     await teamC_team_coach.delete()
 
+
 @bot.command()
-async def 테(ctx):
-    pass
+async def 이적(ctx, before, current, member: discord.Member, price):
+    role_names = [role.name for role in ctx.author.roles]
+    id_num = "" + str(member.id)
+    if "스태프" in role_names:
+        if fun.teamNameConvert(before) != fun.teamNameConvert(current) :
+            # 역할 변경
+            beforeRole = get(member.guild.roles, name=fun.teamNameConvert(before))
+            await member.remove_roles(beforeRole)
+            currentRole = get(member.guild.roles, name=fun.teamNameConvert(current))
+            await member.add_roles(currentRole)
+            # 자산 계산
+            #  - 원소속팀 +
+            if fun.teamNameConvert(before) == 'TEAM_A':
+                money = int(worksheet_info.acell('A2').value)
+                money = money + int(price)
+                worksheet_info.update_acell('A2', str(money))
+                # 원소속팀 출석체크 제거
+                max = str(int(worksheet_check_A.acell('A1').value) + 1)
+                team_list = worksheet_check_A.range('C3:C' + max)
+                for i, cell in enumerate(team_list):
+                    if str(cell.value) == str(member.id):
+                        point = i + 3
+                        worksheet_check_A.delete_rows(point)
+            elif fun.teamNameConvert(before) == 'TEAM_B':
+                money = int(worksheet_info.acell('B2').value)
+                money = money + int(price)
+                worksheet_info.update_acell('B2', str(money))
+                # 원소속팀 출석체크 제거
+                max = str(int(worksheet_check_B.acell('A1').value) + 1)
+                team_list = worksheet_check_B.range('C3:C' + max)
+                for i, cell in enumerate(team_list):
+                    if str(cell.value) == str(member.id):
+                        point = i + 3
+                        print(point)
+                        worksheet_check_B.delete_rows(point)
+            elif fun.teamNameConvert(before) == 'TEAM_C':
+                money = int(worksheet_info.acell('C2').value)
+                money = money + int(price)
+                worksheet_info.update_acell('C2', str(money))
+                # 원소속팀 출석체크 제거
+                max = str(int(worksheet_check_C.acell('A1').value) + 1)
+                team_list = worksheet_check_C.range('C3:C' + max)
+                for i, cell in enumerate(team_list):
+                    if str(cell.value) == str(member.id):
+                        point = i + 3
+                        worksheet_check_C.delete_rows(point)
+            elif fun.teamNameConvert(before) == 'TEAM_D':
+                money = int(worksheet_info.acell('D2').value)
+                money = money + int(price)
+                worksheet_info.update_acell('D2', str(money))
+                # 원소속팀 출석체크 제거
+                max = str(int(worksheet_check_D.acell('A1').value) + 1)
+                team_list = worksheet_check_D.range('C3:C' + max)
+                for i, cell in enumerate(team_list):
+                    if str(cell.value) == str(member.id):
+                        print(i)
+                        point = i + 3
+                        worksheet_check_D.delete_rows(point)
+
+            #  - 이적팀 -
+            if fun.teamNameConvert(current) == 'TEAM_A':
+                money = int(worksheet_info.acell('A2').value)
+                money = money - int(price)
+                worksheet_info.update_acell('A2', str(money))
+                # 이적팀 출석체크 추가
+                amax = worksheet_check_A.acell('A1').value
+                worksheet_check_A.insert_row(["", fun.convertNickname(member.display_name), id_num, fun.convertJupo(member.display_name), 0, 0, 0], int(amax) + 2)
+            elif fun.teamNameConvert(current) == 'TEAM_B':
+                money = int(worksheet_info.acell('B2').value)
+                money = money - int(price)
+                worksheet_info.update_acell('B2', str(money))
+                # 이적팀 출석체크 추가
+                bmax = worksheet_check_B.acell('A1').value
+                worksheet_check_B.insert_row(["", fun.convertNickname(member.display_name), id_num, fun.convertJupo(member.display_name), 0, 0, 0], int(bmax) + 2)
+            elif fun.teamNameConvert(current) == 'TEAM_C':
+                money = int(worksheet_info.acell('C2').value)
+                money = money - int(price)
+                worksheet_info.update_acell('C2', str(money))
+                # 이적팀 출석체크 추가
+                cmax = worksheet_check_C.acell('A1').value
+                worksheet_check_C.insert_row(["", fun.convertNickname(member.display_name), id_num, fun.convertJupo(member.display_name), 0, 0, 0], int(cmax) + 2)
+            elif fun.teamNameConvert(current) == 'TEAM_D':
+                money = int(worksheet_info.acell('D2').value)
+                money = money - int(price)
+                worksheet_info.update_acell('D2', str(money))
+                # 이적팀 출석체크 추가
+                dmax = worksheet_check_D.acell('A1').value
+                worksheet_check_D.insert_row(["", fun.convertNickname(member.display_name), id_num, fun.convertJupo(member.display_name), 0, 0, 0], int(dmax) + 2)
+
+            await ctx.send(content=f"<이적> {fun.convertNickname(member.mention)}, {fun.teamNameConvert(before)} -> {fun.teamNameConvert(current)}, {price} 억원으로 이적")
+
+
+        else:
+            ctx.send("```입력한 전 소속팀과 현 소속팀이 같습니다. 다시 입력해주세요.```")
+    else:
+        await ctx.send("```해당 명령어는 스태프만 사용가능합니다.```")
+
+@bot.command()
+async def 테(ctx, member: discord.Member):
+    # 원소속팀 출석체크 제거
+    max = str(int(worksheet_check_B.acell('A1').value) + 1)
+    team_list = worksheet_check_B.range('C3:C' + max)
+    for i, cell in enumerate(team_list):
+        if str(cell.value) == str(member.id):
+            print('있음')
+            point = i + 3
+            print(point)
+            print(type(point))
+            worksheet_check_B.delete_rows(point)
 
 
 @bot.event
