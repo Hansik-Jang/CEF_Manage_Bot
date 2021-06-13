@@ -11,7 +11,6 @@ from PIL import Image, ImageDraw, ImageFont
 from oauth2client.service_account import ServiceAccountCredentials
 import pytesseract
 import gspread
-
 gc = gspread.service_account(filename='credentials.json')
 sh = gc.open_by_key('1552A1axMJDfxN7kv1TyohmJ3VqKNa7mBeQstHoIRpUQ')
 # sh2 = gc.open_by_key('1OP8XMpM93DPScaHX9hGtukf-qaZyalVgzhF--8i2e7')
@@ -23,22 +22,24 @@ worksheet_check_A = sh.worksheet('출첵A')
 worksheet_check_B = sh.worksheet('출첵B')
 worksheet_check_C = sh.worksheet('출첵C')
 worksheet_check_D = sh.worksheet('출첵D')
-a_team_chat_id = 809757503671500801
-b_team_chat_id = 809757891187179540
-c_team_chat_id = 809758493723721760
+a_team_chat_id = 844177788201992212
+b_team_chat_id = 844177933806338068
+c_team_chat_id = 844177647063007262
 d_team_chat_id = 809758983165968384
-a_check_channel_id = 809810583033348116
-b_check_channel_id = 809758372374642718
-c_check_channel_id = 809758802831212544
+a_check_channel_id = 844177517761527868
+b_check_channel_id = 830808364307972146
+c_check_channel_id = 844177686321430548
 d_check_channel_id = 809759031308714024
 
-bot = commands.Bot(command_prefix="%")
+intents = discord.Intents.all()
+bot = commands.Bot(command_prefix="%", intents=intents)
+
 team = "무소속"
 image_types = ["png", "jpeg", "jpg"]
 
 f = open("key.txt", 'r')
 key = f.readline()
-
+nick_change_switch = 1
 
 @bot.event
 async def on_ready():
@@ -52,16 +53,7 @@ async def on_ready():
 
 @bot.command()
 async def 테스트(ctx):
-     channel = bot.get_channel(784477701443420200)
-     await channel.send("테스트")
-
-@bot.command()
-async def 테스트2(ctx):
-    await ctx.send(                                           f"```cs\n"        
-                                           f"출석체크 및 확인 바랍니다.\n"
-                                           f"1경기 출석 가능 시간 : 전날 23:00 ~ 당일 20:30\n"
-                                           f"2경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n"
-                                           f"3경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n```")
+    pass
 
 @bot.command()
 async def 시트링크(ctx):
@@ -136,10 +128,11 @@ async def 가이드(ctx, text):
         embed.add_field(name="사용권한", value="[everyone]", inline=True)
     elif text == '역할부여':
         embed = discord.Embed(title="%역할부여", description="", color=0x62c1cc)
-        embed.add_field(name="설명", value="입력한 팀 이름과 멘션에 맞춰 팀 역할이 부여되며,\n"
+        embed.add_field(name="설명", value="입력한 팀 이름과 멘션, 포지션에 맞춰 팀 역할이 부여되며,\n"
                                          "스프레드 시트에 업데이트 됩니다.\n"
-                                         "팀 이름 : TEAM_A, TEAM_B, TEAM_C, TEAM_D", inline=False)
-        embed.add_field(name="사용방법", value="%역할부여 <팀이름> @멘션", inline=True)
+                                         "팀 이름 : TEAM_A, TEAM_B, TEAM_C, TEAM_D\n"
+                                         "ST, LW, RW, CAM, CM, CDM, LB, CB, RB, GK", inline=False)
+        embed.add_field(name="사용방법", value="%역할부여 <팀이름> @멘션 <포지션>", inline=True)
         embed.add_field(name="사용권한", value="[스태프]", inline=True)
     elif text == '역할회수':
         embed = discord.Embed(title="%역할회수", description="미구현 상태", color=0x62c1cc)
@@ -292,17 +285,18 @@ async def 가입(ctx):
                     jupo = a[0]
                     b = a[1].split(']')
                     bupo = b[0]
+                    display_name = ctx.author.display_name + "🐤"
                     if key == 0:
                         id_num = "" + str(ctx.author.id)
                         worksheet_list.insert_row(
-                            ["", now_time, ctx.author.display_name, id_num, nickname, jupo, bupo, '무소속',
+                            ["", now_time, display_name, id_num, nickname, jupo, bupo, '무소속',
                              '0000-00-00 00:00:00'], int(cell_max) + 1)
                         worksheet_career.insert_row(
-                            ["", now_time, ctx.author.display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], int(cell_max) + 1)
+                            ["", now_time, display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], int(cell_max) + 1)
                         await ctx.send(content=f"```{ctx.author.display_name}님 정상 등록되었습니다.```")
                         user = ctx.author
-                        role = get(ctx.guild.roles, name='신CEF')
-                        role2 = get(ctx.guild.roles, name='CEF')
+                        role = get(ctx.guild.roles, name='CEF')
+                        role2 = get(ctx.guild.roles, name='신규')
                         await user.add_roles(role)
                         await user.add_roles(role2)
                         channel = bot.get_channel(709025283306684457)
@@ -314,15 +308,16 @@ async def 가입(ctx):
                     a = temp[1].split(']')
                     jupo = a[0]
                     id_num = "" + str(ctx.author.id)
+                    display_name = ctx.author.display_name + "🐤"
                     worksheet_list.insert_row(
-                        ["", now_time, ctx.author.display_name, id_num, nickname, jupo, '', '무소속',
+                        ["", now_time, display_name, id_num, nickname, jupo, '', '무소속',
                          '0000-00-00 00:00:00'], int(cell_max) + 1)
                     worksheet_career.insert_row(
-                        ["", now_time, ctx.author.display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], int(cell_max) + 1)
+                        ["", now_time, display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], int(cell_max) + 1)
                     await ctx.send(content=f"```{ctx.author.display_name}님 정상 등록되었습니다.```")
                     user = ctx.author
-                    role = get(ctx.guild.roles, name='신CEF')
-                    role2 = get(ctx.guild.roles, name='CEF')
+                    role = get(ctx.guild.roles, name='CEF')
+                    role2 = get(ctx.guild.roles, name='신규')
                     await user.add_roles(role)
                     await user.add_roles(role2)
                     channel = bot.get_channel(709025283306684457)
@@ -398,6 +393,7 @@ async def 검색(ctx, *, nickname):
 # 닉네임, 주포, 부포 리셋
 @bot.command()
 async def 리셋(ctx):
+    role_names = [role.name for role in ctx.author.roles]
     key1 = 0
     temp = ctx.author.display_name.split('[')
     nickname = temp[0]
@@ -445,6 +441,8 @@ async def 리셋(ctx):
                 else:
                     key1 = 0
             await ctx.send(content=f"```{ctx.author.display_name}님의 닉네임, 주포지션, 부포지션이 재업데이트 되었습니다.\n"
+                                   f"서버 내 별명 : {ctx.author.display_name}, 닉네임 : {nickname}\n"
+                                   f"주포지션 : {jupo}, 부포지션 : {bupo}"
                                    f"자세한 사항은 %시트링크 명령어를 입력하여, 시트에서 확인해주세요.```")
         else:
             a = temp[1].split(']')
@@ -463,6 +461,8 @@ async def 리셋(ctx):
                 else:
                     key1 = 0
             await ctx.send(content=f"```{ctx.author.display_name}님의 닉네임, 주포지션, 부포지션이 재업데이트 되었습니다.\n"
+                                   f"서버 내 별명 : {ctx.author.display_name}, 닉네임 : {nickname}\n"
+                                   f"주포지션 : {jupo}, 부포지션 : 없음"
                                    f"자세한 사항은 %시트링크 명령어를 입력하여, 시트에서 확인해주세요.```")
     '''else:
         await ctx.send(content=f"{ctx.author.mention}\n"
@@ -578,16 +578,20 @@ async def 부포삭제(ctx):
                                f"%가입 명령어를 사용해 스프레드 시트에 등록하거나\n"
                                f"%닉변 명령어를 사용해 닉네임을 업데이트해주세요.```")
 
-    await ctx.message.delete()
-
 
 # 닉네임 업데이트
 @bot.command()
 async def 닉변(ctx):
-    #await ctx.send("```현재 닉네임 변경 기간이 아닙니다.\n"
-                   #"2월의 닉변 변경일은 2월 12일, 26일 입니다.```")
-    key = 0
     role_names = [role.name for role in ctx.author.roles]
+    '''
+    if not "신규" in role_names: # '신규' 역할이 있을 시
+        await ctx.send("```현재 닉네임 변경 기간이 아닙니다.\n"
+                       "2월의 닉변 변경일은 2월 12일, 26일 입니다.```")
+    
+    if "신규" in role_names: # '신규' 역할이 없을 시
+    '''
+    key = 0
+
     # 범위(체크)
     cell_max = worksheet_list.acell('A1').value
     a_max = str(int(worksheet_check_A.acell('A1').value) + 1)
@@ -680,15 +684,12 @@ async def 닉변(ctx):
         #await ctx.send(content=f"{ctx.author.mention}\n"
                                #f"```해당 닉네임은 이미 사용 중입니다.\n"
                                #f"다른 닉네임으로 변경해주세요.```")
-
-
-
     await ctx.message.delete()
 
 
 # 역할 부여하기
 @bot.command()
-async def 역할부여(ctx, team_name, member: discord.Member):
+async def 역할부여(ctx, team_name, member: discord.Member, position):
     ju_po = ""
     role_names = [role.name for role in ctx.author.roles]
     await ctx.message.delete()
@@ -697,11 +698,18 @@ async def 역할부여(ctx, team_name, member: discord.Member):
         role = get(member.guild.roles, name=team_name)
         id_num = "" + str(member.id)
         # 오타체크
-        role_list = ["TEAM_A", "TEAM_B", "TEAM_C", "TEAM_D"]
-        if role.name in role_list:
-            type_error = 1
+        team_name_list = ["TEAM_A", "TEAM_B", "TEAM_C", "TEAM_D"]
+        position_list = ["ST", "LW", "RW", "CAM", "CM", "CDM", "LB", "CB", "RB", "GK"]
+
+        if role.name in team_name_list:
+            teamname_error = 1
         else:
-            type_error = 0
+            teamname_error = 0
+
+        if position in position_list:
+            position_error = 1
+        else:
+            position_error = 0
         # 범위(체크)
         cell_max = worksheet_list.acell('A1').value
         a_max = worksheet_check_A.acell('A1').value
@@ -709,33 +717,35 @@ async def 역할부여(ctx, team_name, member: discord.Member):
         c_max = worksheet_check_C.acell('A1').value
         d_max = worksheet_check_D.acell('A1').value
         # 범위 내 셀 값 로딩
-        range_list = worksheet_list.range('C2:C' + cell_max)
-
+        range_list = worksheet_list.range('E2:E' + cell_max)
+        temp = member.display_name.split('[')
+        nickname = temp[0]
         # 스프레드 체크 및 업데이트
         for i, cell in enumerate(range_list):
-            if str(cell.value) == str(member.display_name):
+            if str(cell.value) == str(nickname):
                 check = i + 2
                 list_pos = i
-                ju_po = worksheet_list.acell('F' + str(check)).value
                 key = 1
                 break
-        if type_error == 1 & key == 1:
+        if teamname_error == 1 & key == 1 & position_error == 1:
             worksheet_list.update_acell('H' + str(list_pos + 2), team_name)
             await member.add_roles(role)
             await ctx.send(content=f"<소속 변경>\n"
-                                   f"{member.mention} -> {team_name} 배정")
+                                   f"{member.mention} -> {team_name} 배정 (선발 포지션 : {position})")
 
             if team_name == "TEAM_A":
-                worksheet_check_A.insert_row(["", member.display_name, id_num, ju_po, 0, 0, 0], int(a_max) + 2)
+                worksheet_check_A.insert_row(["", member.display_name, id_num, position, 0, 0, 0], int(a_max) + 2)
             if team_name == "TEAM_B":
-                worksheet_check_B.insert_row(["", member.display_name, id_num, ju_po, 0, 0, 0], int(b_max) + 2)
+                worksheet_check_B.insert_row(["", member.display_name, id_num, position, 0, 0, 0], int(b_max) + 2)
             if team_name == "TEAM_C":
-                worksheet_check_C.insert_row(["", member.display_name, id_num, ju_po, 0, 0, 0], int(c_max) + 2)
+                worksheet_check_C.insert_row(["", member.display_name, id_num, position, 0, 0, 0], int(c_max) + 2)
             if team_name == "TEAM_D":
-                worksheet_check_D.insert_row(["", member.display_name, id_num, ju_po, 0, 0, 0], int(d_max) + 2)
+                worksheet_check_D.insert_row(["", member.display_name, id_num, position, 0, 0, 0], int(d_max) + 2)
 
-        elif type_error == 0:
-            await ctx.send("오타 체크 및 팀 이름 확인")
+        elif teamname_error == 0:
+            await ctx.send("팀 이름 오타 체크해주세요.")
+        elif position_error == 0:
+            await ctx.send("포지션 오타 체크해주세요.")
         elif key == 0:
             await ctx.send(content=f"<소속 변경 실패>\n"
                                    f"스프레드 시트에서 {member.mention}님의 이름을 검색할 수 없습니다.\n"
@@ -805,12 +815,14 @@ async def 커리어(ctx, text, member: discord.Member):
         # 범위(체크)
         cell_max = worksheet_list.acell('A1').value
         # 범위 내 셀 값 로딩
-        range_list = worksheet_list.range('D2:D' + cell_max)
+        range_list = worksheet_list.range('E2:E' + cell_max)
+        temp = member.display_name.split('[')
+        nickname = temp[0]
 
         # 스프레드 체크 및 업데이트
         if text == '선수':
             for i, cell in enumerate(range_list):
-                if str(cell.value) == str(member.id):
+                if str(cell.value) == str(nickname):
                     check = i + 2
                     before = worksheet_career.acell('F' + str(check)).value
                     now = int(before) + 1
@@ -826,7 +838,7 @@ async def 커리어(ctx, text, member: discord.Member):
 
         elif text == '코치':
             for i, cell in enumerate(range_list):
-                if str(cell.value) == str(member.id):
+                if str(cell.value) == str(nickname):
                     check = i + 2
                     before = worksheet_career.acell('G' + str(check)).value
                     now = int(before) + 1
@@ -858,82 +870,91 @@ async def 내정보(ctx):
     tots_list = ""
     check = 1
     # 스프레드 체크 및 업데이트
-    if str(ctx.message.channel) != "내정보-열람실📜":
+    '''if str(ctx.message.channel) != "내정보-열람실📜":
+    #if str(ctx.message.channel) != "프클-공지사항📝":
         await ctx.send("내정보-열람실📜 채널에서 사용해주세요.")
-    else:
-        for i, cell in enumerate(range_list):
-            if str(cell.value) == str(ctx.author.id):
-                check = i + 2
-                key = 1
-                team = worksheet_list.acell('H' + str(check)).value
-                player_win = worksheet_career.acell('F' + str(check)).value
-                coach_win = worksheet_career.acell('G' + str(check)).value
-                to_fw = worksheet_career.acell('H' + str(check)).value
-                to_mf = worksheet_career.acell('I' + str(check)).value
-                to_df = worksheet_career.acell('J' + str(check)).value
-                to_gk = worksheet_career.acell('K' + str(check)).value
-                total_to = worksheet_career.acell('L' + str(check)).value
-                before_to = worksheet_career.acell('M' + str(check)).value
-                val = worksheet_career.acell('N' + str(check)).value
-                before_val = worksheet_career.acell('O' + str(check)).value
+    else:'''
+    for i, cell in enumerate(range_list):
+        if str(cell.value) == str(ctx.author.id):
+            check = i + 2
+            key = 1
+            team = worksheet_list.acell('H' + str(check)).value
+            player_win = worksheet_career.acell('F' + str(check)).value
+            coach_win = worksheet_career.acell('G' + str(check)).value
+            to_fw = worksheet_career.acell('H' + str(check)).value
+            to_mf = worksheet_career.acell('I' + str(check)).value
+            to_df = worksheet_career.acell('J' + str(check)).value
+            to_gk = worksheet_career.acell('K' + str(check)).value
+            total_to = worksheet_career.acell('L' + str(check)).value
+            before_to = worksheet_career.acell('M' + str(check)).value
+            val = worksheet_career.acell('N' + str(check)).value
+            before_val = worksheet_career.acell('O' + str(check)).value
+            naejeon = worksheet_career.acell('P' + str(check)).value
+            price = worksheet_career.acell('Q' + str(check)).value
 
-        if key == 1:
-            if "/" in ctx.author.display_name:
-                temp = ctx.author.display_name.split('[')
-                nickname = temp[0]
-                a = temp[1].split('/')
-                jupo = a[0]
-                b = a[1].split(']')
-                bupo = b[0]
+    if key == 1:
+        if "/" in ctx.author.display_name:
+            temp = ctx.author.display_name.split('[')
+            nickname = temp[0]
+            a = temp[1].split('/')
+            jupo = a[0]
+            b = a[1].split(']')
+            bupo = b[0]
 
-                embed = discord.Embed(title=f"내 정보", description=f"{ctx.author.display_name} 님의 정보창", color=0xFF007F)
-                embed.add_field(name="닉네임", value=nickname, inline=True)
-                embed.add_field(name="주포지션", value=jupo, inline=True)
-                embed.add_field(name="부포지션", value=bupo, inline=True)
-                embed.add_field(name="소속팀", value=f"{team}", inline=True)
-                embed.add_field(name="선수 우승", value=f"{player_win} 회", inline=True)
-                embed.add_field(name="코치 우승", value=f"{coach_win} 회", inline=True)
-                embed.add_field(name="토츠", value=f"총 수상 횟수 : {total_to} 회\n"
-                                                  f"FW : {to_fw} 회\n"
-                                                  f"MF : {to_mf} 회\n"
-                                                  f"DF : {to_df} 회\n"
-                                                  f"GK : {to_gk} 회\n", inline=True)
-                embed.add_field(name="발롱도르", value=f"{val} 회", inline=True)
-                embed.add_field(name="이전 커리어", value=f"토츠 : {before_to} 회\n"
-                                                     f"발롱도르 : {before_val} 회", inline=True)
-                embed.set_footer(text="Copyright ⓒ 2020-2021 타임제이(TimeJ) in C.E.F All Right Reserved.")
+            embed = discord.Embed(title=f"내 정보", description=f"{ctx.author.display_name} 님의 정보창", color=0xFF007F)
+            embed.add_field(name="이적료", value=price + " 억원", inline=False)
+            embed.add_field(name="소속팀", value=f"{team}", inline=True)
+            embed.add_field(name="주포지션", value=jupo, inline=True)
+            embed.add_field(name="부포지션", value=bupo, inline=True)
+            embed.add_field(name="우승 기록", value=f"선수 : {player_win} 회\n"
+                                                  f"코치 : {coach_win} 회\n"
+                                                  f"내전 리그 : {naejeon} 회", inline=True)
 
-                await ctx.send(embed=embed)
-            else:
-                temp = ctx.author.display_name.split('[')
-                nickname = temp[0]
-                a = temp[1].split(']')
-                jupo = a[0]
-                bupo = "없음"
 
-                embed = discord.Embed(title=f"내 정보", description=f"{ctx.author.display_name} 님의 정보창", color=0xFF007F)
-                embed.add_field(name="닉네임", value=nickname, inline=True)
-                embed.add_field(name="주포지션", value=jupo, inline=True)
-                embed.add_field(name="부포지션", value="없음", inline=True)
-                embed.add_field(name="소속팀", value=f"{team}", inline=True)
-                embed.add_field(name="선수 우승", value=f"{player_win} 회", inline=True)
-                embed.add_field(name="코치 우승", value=f"{coach_win} 회", inline=True)
-                embed.add_field(name="토츠", value=f"총 수상 횟수 : {total_to} 회\n"
-                                                  f"FW : {to_fw} 회\n"
-                                                  f"MF : {to_mf} 회\n"
-                                                  f"DF : {to_df} 회\n"
-                                                  f"GK : {to_gk} 회\n", inline=True)
-                embed.add_field(name="발롱도르", value=f"{val} 회", inline=True)
-                embed.add_field(name="이전 커리어", value=f"토츠 : {before_to} 회\n"
-                                                     f"발롱도르 : {before_val} 회", inline=True)
+            embed.add_field(name="수상 내역", value=f"토츠 : 총 {total_to} 회\n"
+                                                  f"- FW : {to_fw} 회\n"
+                                                  f"- MF : {to_mf} 회\n"
+                                                  f"- DF : {to_df} 회\n"
+                                                  f"- GK : {to_gk} 회\n"
+                                                  f"발롱도르 : {val} 회\n", inline=True)
+            embed.add_field(name="이전 수상 내역", value=f"토츠 : {before_to} 회\n"
+                                                       f"발롱도르 : {before_val} 회", inline=True)
+            embed.set_footer(text="Copyright ⓒ 2020-2021 타임제이(TimeJ) in C.E.F All Right Reserved.")
 
-                embed.set_footer(text="Copyright ⓒ 2020-2021 타임제이(TimeJ) in C.E.F All Right Reserved.")
-
-                await ctx.send(embed=embed)
+            await ctx.send(embed=embed)
         else:
-            await ctx.send(content=f"```스프레드 시트에서 {ctx.author.display_name}님의 이름을 검색할 수 없습니다.\n"
-                                   f"%가입 명령어를 사용해 스프레드 시트에 등록하거나\n"
-                                   f"%닉변 명령어를 사용해 닉네임을 업데이트해주세요.```")
+            temp = ctx.author.display_name.split('[')
+            nickname = temp[0]
+            a = temp[1].split(']')
+            jupo = a[0]
+            bupo = "없음"
+
+            embed = discord.Embed(title=f"내 정보", description=f"{ctx.author.display_name} 님의 정보창", color=0xFF007F)
+            embed.add_field(name="이적료", value=price + " 억원", inline=False)
+            embed.add_field(name="소속팀", value=f"{team}", inline=True)
+            embed.add_field(name="주포지션", value=jupo, inline=True)
+            embed.add_field(name="부포지션", value=bupo, inline=True)
+            embed.add_field(name="우승 기록", value=f"선수 : {player_win} 회\n"
+                                                  f"코치 : {coach_win} 회\n"
+                                                  f"내전 리그 : {naejeon} 회", inline=True)
+
+
+            embed.add_field(name="수상 내역", value=f"토츠 : 총 {total_to} 회\n"
+                                                  f"- FW : {to_fw} 회\n"
+                                                  f"- MF : {to_mf} 회\n"
+                                                  f"- DF : {to_df} 회\n"
+                                                  f"- GK : {to_gk} 회\n"
+                                                  f"발롱도르 : {val} 회\n", inline=True)
+            embed.add_field(name="이전 수상 내역", value=f"토츠 : {before_to} 회\n"
+                                                       f"발롱도르 : {before_val} 회", inline=True)
+            embed.set_footer(text="Copyright ⓒ 2020-2021 타임제이(TimeJ) in C.E.F All Right Reserved.")
+
+
+            await ctx.send(embed=embed)
+    else:
+        await ctx.send(content=f"```스프레드 시트에서 {ctx.author.display_name}님의 이름을 검색할 수 없습니다.\n"
+                               f"%가입 명령어를 사용해 스프레드 시트에 등록하거나\n"
+                               f"%닉변 명령어를 사용해 닉네임을 업데이트해주세요.```")
 
 
 @bot.command()
@@ -943,11 +964,13 @@ async def 발롱도르(ctx, member: discord.Member):
     # 범위(체크)
     cell_max = worksheet_list.acell('A1').value
     # 범위 내 셀 값 로딩
-    range_list = worksheet_list.range('C2:C' + cell_max)
+    range_list = worksheet_list.range('E2:E' + cell_max)
+    temp = member.display_name.split('[')
+    nickname = temp[0]
     if "스태프" in role_names:
         # 중복 체크
         for cell in range_list:
-            if cell.value == member.display_name:
+            if cell.value == nickname:
                 key = 1
                 print(key)
                 print(str(cell.value) + " / " + str(member.display_name))
@@ -960,12 +983,12 @@ async def 발롱도르(ctx, member: discord.Member):
         # 스프레드 체크 및 업데이트
         if key == 1:
             for i, cell in enumerate(range_list):
-                if str(cell.value) == str(member.display_name):
+                if str(cell.value) == str(nickname):
                     print(1)
                     check = i + 2
-                    before = worksheet_career.acell('M' + str(check)).value
+                    before = worksheet_career.acell('N' + str(check)).value
                     now_num = int(before) + 1
-                    worksheet_career.update_acell('M' + str(check), str(now_num))
+                    worksheet_career.update_acell('N' + str(check), str(now_num))
                     await ctx.send(content=f"```cs\n"
                                            f"{member.display_name} 님의 발롱도르 업데이트가 정상적으로 되었습니다.\n"
                                            f"이전 기록 : {before}회 --> 현재 기록 : {now_num}회```")
@@ -985,11 +1008,12 @@ async def 토츠(ctx, position, member: discord.Member):
     # 범위(체크)
     cell_max = worksheet_list.acell('A1').value
     # 범위 내 셀 값 로딩
-    range_list = worksheet_list.range('C2:C' + cell_max)
-
+    range_list = worksheet_list.range('E2:E' + cell_max)
+    temp = member.display_name.split('[')
+    nickname = temp[0]
     # 중복 체크
     for cell in range_list:
-        if cell.value == member.display_name:
+        if cell.value == nickname:
             key = 1
             break
         else:
@@ -1000,7 +1024,7 @@ async def 토츠(ctx, position, member: discord.Member):
         if key == 1:
             if position == 'FW':
                 for i, cell in enumerate(range_list):
-                    if str(cell.value) == str(member.display_name):
+                    if str(cell.value) == str(nickname):
                         check = i + 2
                         before = worksheet_career.acell('H' + str(check)).value
                         before_to = worksheet_career.acell('L' + str(check)).value
@@ -1014,7 +1038,7 @@ async def 토츠(ctx, position, member: discord.Member):
                                                f"이전 총 토츠 기록 : {before_to}회 --> 현재 총 토츠 기록 : {now_to}회```")
             elif position == 'MF':
                 for i, cell in enumerate(range_list):
-                    if str(cell.value) == str(member.display_name):
+                    if str(cell.value) == str(nickname):
                         check = i + 2
                         before = worksheet_career.acell('I' + str(check)).value
                         before_to = worksheet_career.acell('L' + str(check)).value
@@ -1028,7 +1052,7 @@ async def 토츠(ctx, position, member: discord.Member):
                                                f"이전 총 토츠 기록 : {before_to}회 --> 현재 총 토츠 기록 : {now_to}회```")
             elif position == 'DF':
                 for i, cell in enumerate(range_list):
-                    if str(cell.value) == str(member.display_name):
+                    if str(cell.value) == str(nickname):
                         check = i + 2
                         before = worksheet_career.acell('J' + str(check)).value
                         before_to = worksheet_career.acell('L' + str(check)).value
@@ -1042,7 +1066,7 @@ async def 토츠(ctx, position, member: discord.Member):
                                                f"이전 총 토츠 기록 : {before_to}회 --> 현재 총 토츠 기록 : {now_to}회```")
             elif position == 'GK':
                 for i, cell in enumerate(range_list):
-                    if str(cell.value) == str(member.display_name):
+                    if str(cell.value) == str(nickname):
                         check = i + 2
                         before = worksheet_career.acell('K' + str(check)).value
                         before_to = worksheet_career.acell('L' + str(check)).value
@@ -1067,9 +1091,9 @@ async def 토츠(ctx, position, member: discord.Member):
 @bot.command()
 async def 출석(ctx, game):
     time_now = datetime.datetime.now()
-    time_1st = datetime.datetime(time_now.year, time_now.month, time_now.day, 20, 30, 00)
-    time_2nd = datetime.datetime(time_now.year, time_now.month, time_now.day, 21, 00, 00)
-    time_3rd = datetime.datetime(time_now.year, time_now.month, time_now.day, 21, 30, 00)
+    time_1st = datetime.datetime(time_now.year, time_now.month, time_now.day, 21, 00, 00)
+    time_2nd = datetime.datetime(time_now.year, time_now.month, time_now.day, 21, 30, 00)
+    time_3rd = datetime.datetime(time_now.year, time_now.month, time_now.day, 22, 00, 00)
     time_after = datetime.datetime(time_now.year, time_now.month, time_now.day, 23, 00, 00)
     now_month = time_now.strftime('%m')
     now_day = time_now.strftime('%d')
@@ -1089,7 +1113,7 @@ async def 출석(ctx, game):
                     if game == '1':
                         if time_1st < time_now and time_now < time_after:
                             await ctx.send("1경기 출석 가능한 시간이 아닙니다.\n"
-                                           "출석 가능 시간 - 20:30 까지")
+                                           "출석 가능 시간 - 21:30 까지")
                         else:
                             worksheet_check_A.update_acell('E' + str(temp), '체크')
                             await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
@@ -1106,13 +1130,13 @@ async def 출석(ctx, game):
                                                    f"정상적으로 출석참가 되었습니다.```")
                     elif game == '3':
                         if time_3rd < time_now and time_now < time_after:
-                            await ctx.send("2경기 출석 가능한 시간이 아닙니다.\n"
-                                           "출석 가능 시간 - 21:00 까지")
+                            await ctx.send("3경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 21:30 까지")
                         else:
                             worksheet_check_A.update_acell('G' + str(temp), '체크')
                             await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}\n"
-                                               f"정상적으로 출석참가 되었습니다.```")
+                                                   f"닉네임 : {ctx.author.display_name}\n"
+                                                   f"정상적으로 출석참가 되었습니다.```")
                     else:
                         await ctx.send("```입력이 잘못되었습니다.```")
         else:
@@ -1126,20 +1150,32 @@ async def 출석(ctx, game):
                     temp = i + 3
                     jupo = worksheet_check_B.acell('D' + str(temp)).value
                     if game == '1':
-                        worksheet_check_B.update_acell('E' + str(temp), '체크')
-                        await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}\n"
-                                               f"정상적으로 출석참가 되었습니다.```")
+                        if time_1st < time_now and time_now < time_after:
+                            await ctx.send("1경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 21:30 까지")
+                        else:
+                            worksheet_check_B.update_acell('E' + str(temp), '체크')
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
+                                                   f"닉네임 : {ctx.author.display_name}\n"
+                                                   f"정상적으로 출석참가 되었습니다.```")
                     elif game == '2':
-                        worksheet_check_B.update_acell('F' + str(temp), '체크')
-                        await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}\n"
-                                               f"정상적으로 출석참가 되었습니다.```")
+                        if time_2nd < time_now and time_now < time_after:
+                            await ctx.send("2경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 21:00 까지")
+                        else:
+                            worksheet_check_B.update_acell('F' + str(temp), '체크')
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
+                                                   f"닉네임 : {ctx.author.display_name}\n"
+                                                   f"정상적으로 출석참가 되었습니다.```")
                     elif game == '3':
-                        worksheet_check_B.update_acell('G' + str(temp), '체크')
-                        await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}\n"
-                                               f"정상적으로 출석참가 되었습니다.```")
+                        if time_3rd < time_now and time_now < time_after:
+                            await ctx.send("3경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 21:30 까지")
+                        else:
+                            worksheet_check_B.update_acell('G' + str(temp), '체크')
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
+                                                   f"닉네임 : {ctx.author.display_name}\n"
+                                                   f"정상적으로 출석참가 되었습니다.```")
                     else:
                         await ctx.send("```입력이 잘못되었습니다.```")
         else:
@@ -1153,21 +1189,33 @@ async def 출석(ctx, game):
                 if str(cell.value) == str(ctx.author.id):
                     temp = i + 3
                     jupo = worksheet_check_C.acell('D' + str(temp)).value
-                    if game == '1':
-                        worksheet_check_C.update_acell('E' + str(temp), '체크')
-                        await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}\n"
-                                               f"정상적으로 출석참가 되었습니다.```")
-                    elif game == '2':
-                        worksheet_check_C.update_acell('F' + str(temp), '체크')
-                        await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}\n"
-                                               f"정상적으로 출석참가 되었습니다.```")
-                    elif game == '3':
-                        worksheet_check_C.update_acell('G' + str(temp), '체크')
-                        await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}\n"
-                                               f"정상적으로 출석참가 되었습니다.```")
+                    if game == '1' :
+                        if time_1st < time_now and time_now < time_after :
+                            await ctx.send("1경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 21:30 까지")
+                        else :
+                            worksheet_check_C.update_acell('E' + str(temp), '체크')
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
+                                                   f"닉네임 : {ctx.author.display_name}\n"
+                                                   f"정상적으로 출석참가 되었습니다.```")
+                    elif game == '2' :
+                        if time_2nd < time_now and time_now < time_after :
+                            await ctx.send("2경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 21:00 까지")
+                        else :
+                            worksheet_check_C.update_acell('F' + str(temp), '체크')
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
+                                                   f"닉네임 : {ctx.author.display_name}\n"
+                                                   f"정상적으로 출석참가 되었습니다.```")
+                    elif game == '3' :
+                        if time_3rd < time_now and time_now < time_after :
+                            await ctx.send("3경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 21:30 까지")
+                        else :
+                            worksheet_check_C.update_acell('G' + str(temp), '체크')
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
+                                                   f"닉네임 : {ctx.author.display_name}\n"
+                                                   f"정상적으로 출석참가 되었습니다.```")
                     else:
                         await ctx.send("```입력이 잘못되었습니다.```")
         else:
@@ -1182,20 +1230,32 @@ async def 출석(ctx, game):
                     temp = i + 3
                     jupo = worksheet_check_D.acell('D' + str(temp)).value
                     if game == '1':
-                        worksheet_check_D.update_acell('E' + str(temp), '체크')
-                        await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}\n"
-                                               f"정상적으로 출석참가 되었습니다.```")
+                        if time_1st < time_now and time_now < time_after:
+                            await ctx.send("1경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 20:30 까지")
+                        else:
+                            worksheet_check_D.update_acell('E' + str(temp), '체크')
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
+                                                   f"닉네임 : {ctx.author.display_name}\n"
+                                                   f"정상적으로 출석참가 되었습니다.```")
                     elif game == '2':
-                        worksheet_check_D.update_acell('F' + str(temp), '체크')
-                        await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}\n"
-                                               f"정상적으로 출석참가 되었습니다.```")
+                        if time_2nd < time_now and time_now < time_after:
+                            await ctx.send("2경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 20:30 까지")
+                        else:
+                            worksheet_check_D.update_acell('F' + str(temp), '체크')
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
+                                                   f"닉네임 : {ctx.author.display_name}\n"
+                                                   f"정상적으로 출석참가 되었습니다.```")
                     elif game == '3':
-                        worksheet_check_D.update_acell('G' + str(temp), '체크')
-                        await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}\n"
-                                               f"정상적으로 출석참가 되었습니다.```")
+                        if time_3rd < time_now and time_now < time_after:
+                            await ctx.send("3경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 20:30 까지")
+                        else:
+                            worksheet_check_D.update_acell('G' + str(temp), '체크')
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
+                                                   f"닉네임 : {ctx.author.display_name}\n"
+                                                   f"정상적으로 출석참가 되었습니다.```")
                     else:
                         await ctx.send("```입력이 잘못되었습니다.```")
         else:
@@ -1206,9 +1266,13 @@ async def 출석(ctx, game):
 
 @bot.command()
 async def 출석취소(ctx, game):
-    now = datetime.datetime.now()
-    now_month = now.strftime('%m')
-    now_day = now.strftime('%d')
+    time_now = datetime.datetime.now()
+    time_1st = datetime.datetime(time_now.year, time_now.month, time_now.day, 21, 00, 00)
+    time_2nd = datetime.datetime(time_now.year, time_now.month, time_now.day, 21, 30, 00)
+    time_3rd = datetime.datetime(time_now.year, time_now.month, time_now.day, 22, 00, 00)
+    time_after = datetime.datetime(time_now.year, time_now.month, time_now.day, 23, 00, 00)
+    now_month = time_now.strftime('%m')
+    now_day = time_now.strftime('%d')
     role_names = [role.name for role in ctx.author.roles]
 
     # 범위(체크)
@@ -1236,20 +1300,32 @@ async def 출석취소(ctx, game):
                     jupo = worksheet_check_A.acell('D' + str(temp)).value
                     print(jupo)
                     if game == '1':
-                        worksheet_check_A.update_acell('E' + str(temp), '0')
-                        await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
-                                               f"정상적으로 출석취소 되었습니다.```")
+                        if time_1st < time_now and time_now < time_after:
+                            await ctx.send("1경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 20:30 까지")
+                        else:
+                            worksheet_check_A.update_acell('E' + str(temp), '0')
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                                   f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
+                                                   f"정상적으로 출석취소 되었습니다.```")
                     elif game == '2':
-                        worksheet_check_A.update_acell('F' + str(temp), '0')
-                        await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
-                                               f"정상적으로 출석취소 되었습니다.```")
+                        if time_2nd < time_now and time_now < time_after:
+                            await ctx.send("2경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 20:30 까지")
+                        else:
+                            worksheet_check_A.update_acell('F' + str(temp), '0')
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                                   f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
+                                                   f"정상적으로 출석취소 되었습니다.```")
                     elif game == '3':
-                        worksheet_check_A.update_acell('G' + str(temp), '0')
-                        await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
-                                               f"정상적으로 출석취소 되었습니다.```")
+                        if time_3rd < time_now and time_now < time_after:
+                            await ctx.send("3경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 20:30 까지")
+                        else:
+                            worksheet_check_A.update_acell('G' + str(temp), '0')
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                                   f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
+                                                   f"정상적으로 출석취소 되었습니다.```")
                     else:
                         await ctx.send("```입력이 잘못되었습니다.```")
         else:
@@ -1261,20 +1337,32 @@ async def 출석취소(ctx, game):
                     temp = i + 3
                     jupo = worksheet_check_B.acell('D' + str(temp)).value
                     if game == '1':
-                        worksheet_check_B.update_acell('E' + str(temp), '0')
-                        await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
-                                               f"정상적으로 출석취소 되었습니다.```")
+                        if time_1st < time_now and time_now < time_after:
+                            await ctx.send("1경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 20:30 까지")
+                        else:
+                            worksheet_check_B.update_acell('E' + str(temp), '0')
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
+                                                   f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
+                                                   f"정상적으로 출석취소 되었습니다.```")
                     elif game == '2':
-                        worksheet_check_B.update_acell('F' + str(temp), '0')
-                        await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
-                                               f"정상적으로 출석취소 되었습니다.```")
+                        if time_2nd < time_now and time_now < time_after:
+                            await ctx.send("2경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 20:30 까지")
+                        else:
+                            worksheet_check_B.update_acell('F' + str(temp), '0')
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
+                                                   f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
+                                                   f"정상적으로 출석취소 되었습니다.```")
                     elif game == '3':
-                        worksheet_check_B.update_acell('G' + str(temp), '0')
-                        await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
-                                               f"정상적으로 출석취소 되었습니다.```")
+                        if time_3rd < time_now and time_now < time_after:
+                            await ctx.send("3경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 20:30 까지")
+                        else:
+                            worksheet_check_B.update_acell('G' + str(temp), '0')
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
+                                                   f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
+                                                   f"정상적으로 출석취소 되었습니다.```")
                     else:
                         await ctx.send("```입력이 잘못되었습니다.```")
         else:
@@ -1287,20 +1375,32 @@ async def 출석취소(ctx, game):
                     temp = i + 3
                     jupo = worksheet_check_C.acell('D' + str(temp)).value
                     if game == '1':
-                        worksheet_check_C.update_acell('E' + str(temp), '0')
-                        await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
-                                               f"정상적으로 출석취소 되었습니다.```")
+                        if time_1st < time_now and time_now < time_after:
+                            await ctx.send("1경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 20:30 까지")
+                        else:
+                            worksheet_check_C.update_acell('E' + str(temp), '0')
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
+                                                   f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
+                                                   f"정상적으로 출석취소 되었습니다.```")
                     elif game == '2':
-                        worksheet_check_C.update_acell('F' + str(temp), '0')
-                        await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
-                                               f"정상적으로 출석취소 되었습니다.```")
+                        if time_2nd < time_now and time_now < time_after:
+                            await ctx.send("2경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 20:30 까지")
+                        else:
+                            worksheet_check_C.update_acell('F' + str(temp), '0')
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
+                                                   f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
+                                                   f"정상적으로 출석취소 되었습니다.```")
                     elif game == '3':
-                        worksheet_check_C.update_acell('G' + str(temp), '0')
-                        await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
-                                               f"정상적으로 출석취소 되었습니다.```")
+                        if time_3rd < time_now and time_now < time_after:
+                            await ctx.send("3경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 20:30 까지")
+                        else:
+                            worksheet_check_C.update_acell('G' + str(temp), '0')
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
+                                                   f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
+                                                   f"정상적으로 출석취소 되었습니다.```")
                     else:
                         await ctx.send("```입력이 잘못되었습니다.```")
         else:
@@ -1313,20 +1413,32 @@ async def 출석취소(ctx, game):
                     temp = i + 3
                     jupo = worksheet_check_D.acell('D' + str(temp)).value
                     if game == '1':
-                        worksheet_check_D.update_acell('E' + str(temp), '0')
-                        await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
-                                               f"정상적으로 출석취소 되었습니다.```")
+                        if time_1st < time_now and time_now < time_after:
+                            await ctx.send("1경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 20:30 까지")
+                        else:
+                            worksheet_check_D.update_acell('E' + str(temp), '0')
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
+                                                   f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
+                                                   f"정상적으로 출석취소 되었습니다.```")
                     elif game == '2':
-                        worksheet_check_D.update_acell('F' + str(temp), '0')
-                        await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
-                                               f"정상적으로 출석취소 되었습니다.```")
+                        if time_2nd < time_now and time_now < time_after:
+                            await ctx.send("2경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 20:30 까지")
+                        else:
+                            worksheet_check_D.update_acell('F' + str(temp), '0')
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
+                                                   f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
+                                                   f"정상적으로 출석취소 되었습니다.```")
                     elif game == '3':
-                        worksheet_check_D.update_acell('G' + str(temp), '0')
-                        await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
-                                               f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
-                                               f"정상적으로 출석취소 되었습니다.```")
+                        if time_3rd < time_now and time_now < time_after:
+                            await ctx.send("3경기 출석 가능한 시간이 아닙니다.\n"
+                                           "출석 가능 시간 - 20:30 까지")
+                        else:
+                            worksheet_check_D.update_acell('G' + str(temp), '0')
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
+                                                   f"닉네임 : {ctx.author.display_name}, 포지션 : {jupo}\n"
+                                                   f"정상적으로 출석취소 되었습니다.```")
                     else:
                         await ctx.send("```입력이 잘못되었습니다.```")
         else:
@@ -1724,33 +1836,33 @@ async def 출석공지(ctx):
     A_check_channel = bot.get_channel(a_check_channel_id)
     B_check_channel = bot.get_channel(b_check_channel_id)
     C_check_channel = bot.get_channel(c_check_channel_id)
-    D_check_channel = bot.get_channel(d_check_channel_id)
+    #D_check_channel = bot.get_channel(d_check_channel_id)
 
     if '스태프' in role_names:
         await A_check_channel.send(content=f"{A_role.mention}\n"
                                            f"```cs\n"        
                                            f"출석체크 및 확인 바랍니다.\n"
-                                           f"1경기 출석 가능 시간 : 전날 23:00 ~ 당일 20:30\n"
-                                           f"2경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n"
-                                           f"3경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n```")
+                                           f"1경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n"
+                                           f"2경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:30\n"
+                                           f"3경기 출석 가능 시간 : 전날 23:00 ~ 당일 22:00\n```")
         await B_check_channel.send(content=f"{B_role.mention}\n"
                                            f"```cs\n"        
                                            f"출석체크 및 확인 바랍니다.\n"
-                                           f"1경기 출석 가능 시간 : 전날 23:00 ~ 당일 20:30\n"
-                                           f"2경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n"
-                                           f"3경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n```")
+                                           f"1경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n"
+                                           f"2경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:30\n"
+                                           f"3경기 출석 가능 시간 : 전날 23:00 ~ 당일 22:00\n```")
         await C_check_channel.send(content=f"{C_role.mention}\n"
                                            f"```cs\n"        
                                            f"출석체크 및 확인 바랍니다.\n"
-                                           f"1경기 출석 가능 시간 : 전날 23:00 ~ 당일 20:30\n"
-                                           f"2경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n"
-                                           f"3경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n```")
-        await D_check_channel.send(content=f"{D_role.mention}\n"
+                                           f"1경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n"
+                                           f"2경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:30\n"
+                                           f"3경기 출석 가능 시간 : 전날 23:00 ~ 당일 22:00\n```")
+        '''await D_check_channel.send(content=f"{D_role.mention}\n"
                                            f"```cs\n"        
                                            f"출석체크 및 확인 바랍니다.\n"
-                                           f"1경기 출석 가능 시간 : 전날 23:00 ~ 당일 20:30\n"
-                                           f"2경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n"
-                                           f"3경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n```")
+                                           f"1경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:00\n"
+                                           f"2경기 출석 가능 시간 : 전날 23:00 ~ 당일 21:30\n"
+                                           f"3경기 출석 가능 시간 : 전날 23:00 ~ 당일 22:00\n```")'''
     else:
         await ctx.send("```해당 명령어는 스태프만 사용 가능합니다.```")
 
@@ -1774,8 +1886,160 @@ async def 종료공지(ctx):
     await c_check_channel.send(content=f"{emojis}\n")
     await c_check_channel.send("```리그 종료 시간 23시 입니다.```")
 
-    await d_check_channel.send(content=f"{emojis}\n")
-    await d_check_channel.send("```리그 종료 시간 23시 입니다.```")
+    #await d_check_channel.send(content=f"{emojis}\n")
+    #await d_check_channel.send("```리그 종료 시간 23시 입니다.```")
+
+
+@bot.command()
+async def 리그초기화(ctx):
+    # --------------------------------------
+    # 리그 역할 초기화
+    roleli = []
+    role_names = ["TEAM_A", "TEAM_B", "TEAM_C", "TEAM_D"]
+    for rolename in role_names:
+        roleli.append(get(ctx.guild.roles, name=rolename))
+    for role in roleli:
+        for member in role.members:
+            await member.remove_roles(role)
+            #await ctx.send(content=f"{member.display_name} - {role} 제거")       메시지 닉네임 출력
+            #await ctx.send(content=f"{member.mention} - {role} 제거")            메시지 멘션 출력
+    # --------------------------------------
+    # 출석 체크 시트 초기화
+    worksheet_check_A.delete_rows(3, 100)
+    worksheet_check_B.delete_rows(3, 100)
+    worksheet_check_C.delete_rows(3, 100)
+    worksheet_check_D.delete_rows(3, 100)
+    # --------------------------------------
+    # 명단 시트 - 소속 변경
+    max = worksheet_list.acell('A1').value
+    crange = 'H2:H' + max
+    cell_list = worksheet_list.range(crange)
+    for cell in cell_list:
+        cell.value = '무소속'
+    worksheet_list.update_cells(cell_list)
+    # --------------------------------------
+    # 채널 초기화
+    # A팀 카테고리
+    categoryA = get(ctx.guild.categories, name='⚽  TEAM A')
+    #  - 팀채팅
+    teamA_team_chat = get(ctx.guild.channels, name='team-a-팀채팅')
+    teamA_team_chat_temp = teamA_team_chat.overwrites
+    temp = await ctx.guild.create_text_channel(name='team-a-팀채팅', category=categoryA)
+    await temp.edit(overwrites=teamA_team_chat_temp)
+    await teamA_team_chat.delete()
+    #  - 전술노트
+    teamA_team_tatic = get(ctx.guild.channels, name='team-a-전술노트')
+    teamA_team_tatic_temp = teamA_team_tatic.overwrites
+    temp = await ctx.guild.create_text_channel(name='team-a-전술노트', category=categoryA)
+    await temp.edit(overwrites=teamA_team_tatic_temp)
+    await teamA_team_tatic.delete()
+    #  - 선발명단
+    teamA_team_lineup = get(ctx.guild.channels, name='team-a-선발명단')
+    teamA_team_lineup_temp = teamA_team_chat.overwrites
+    temp = await ctx.guild.create_text_channel(name='team-a-선발명단', category=categoryA)
+    await temp.edit(overwrites=teamA_team_lineup_temp)
+    await teamA_team_lineup.delete()
+    #  - 출석조사
+    teamA_team_check = get(ctx.guild.channels, name='team-a-출석조사')
+    teamA_team_check_temp = teamA_team_chat.overwrites
+    temp = await ctx.guild.create_text_channel(name='team-a-출석조사', category=categoryA)
+    await temp.edit(overwrites=teamA_team_check_temp)
+    await teamA_team_check.delete()
+    #  - 불참-인원관리
+    teamA_team_out = get(ctx.guild.channels, name='불참-인원-관리')
+    teamA_team_out_temp = teamA_team_chat.overwrites
+    temp = await ctx.guild.create_text_channel(name='불참-인원-관리', category=categoryA)
+    await temp.edit(overwrites=teamA_team_out_temp)
+    await teamA_team_out.delete()
+    #  - 주장-토크
+    teamA_team_coach = get(ctx.guild.channels, name='주장-토크')
+    teamA_team_coach_temp = teamA_team_chat.overwrites
+    temp = await ctx.guild.create_text_channel(name='주장-토크', category=categoryA)
+    await temp.edit(overwrites=teamA_team_coach_temp)
+    await teamA_team_coach.delete()
+
+    # B팀 카테고리
+    categoryB = get(ctx.guild.categories, name='⚽  TEAM B')
+    #  - 팀채팅
+    teamB_team_chat = get(ctx.guild.channels, name='team-b-팀채팅')
+    teamB_team_chat_temp = teamB_team_chat.overwrites
+    temp = await ctx.guild.create_text_channel(name='team-b-팀채팅', category=categoryB)
+    await temp.edit(overwrites=teamB_team_chat_temp)
+    await teamB_team_chat.delete()
+    #  - 전술노트
+    teamB_team_tatic = get(ctx.guild.channels, name='team-b-전술노트')
+    teamB_team_tatic_temp = teamB_team_tatic.overwrites
+    temp = await ctx.guild.create_text_channel(name='team-b-전술노트', category=categoryB)
+    await temp.edit(overwrites=teamB_team_tatic_temp)
+    await teamB_team_tatic.delete()
+    #  - 선발명단
+    teamB_team_lineup = get(ctx.guild.channels, name='team-b-선발명단')
+    teamB_team_lineup_temp = teamB_team_chat.overwrites
+    temp = await ctx.guild.create_text_channel(name='team-b-선발명단', category=categoryB)
+    await temp.edit(overwrites=teamB_team_lineup_temp)
+    await teamB_team_lineup.delete()
+    #  - 출석조사
+    teamB_team_check = get(ctx.guild.channels, name='team-b-출석조사')
+    teamB_team_check_temp = teamB_team_chat.overwrites
+    temp = await ctx.guild.create_text_channel(name='team-b-출석조사', category=categoryB)
+    await temp.edit(overwrites=teamB_team_check_temp)
+    await teamB_team_check.delete()
+    #  - 불참-인원관리
+    teamB_team_out = get(ctx.guild.channels, name='불참-인원-관리')
+    teamB_team_out_temp = teamB_team_chat.overwrites
+    temp = await ctx.guild.create_text_channel(name='불참-인원-관리', category=categoryB)
+    await temp.edit(overwrites=teamB_team_out_temp)
+    await teamB_team_out.delete()
+    #  - 주장-토크
+    teamB_team_coach = get(ctx.guild.channels, name='주장-토크')
+    teamB_team_coach_temp = teamB_team_chat.overwrites
+    temp = await ctx.guild.create_text_channel(name='주장-토크', category=categoryB)
+    await temp.edit(overwrites=teamB_team_coach_temp)
+    await teamB_team_coach.delete()
+
+    # C팀 카테고리
+    categoryB = get(ctx.guild.categories, name='⚽  TEAM C')
+    #  - 팀채팅
+    teamC_team_chat = get(ctx.guild.channels, name='team-c-팀채팅')
+    teamC_team_chat_temp = teamC_team_chat.overwrites
+    temp = await ctx.guild.create_text_channel(name='team-c-팀채팅', category=categoryB)
+    await temp.edit(overwrites=teamC_team_chat_temp)
+    await teamC_team_chat.delete()
+    #  - 전술노트
+    teamC_team_tatic = get(ctx.guild.channels, name='team-c-전술노트')
+    teamC_team_tatic_temp = teamC_team_tatic.overwrites
+    temp = await ctx.guild.create_text_channel(name='team-c-전술노트', category=categoryB)
+    await temp.edit(overwrites=teamC_team_tatic_temp)
+    await teamC_team_tatic.delete()
+    #  - 선발명단
+    teamC_team_lineup = get(ctx.guild.channels, name='team-c-선발명단')
+    teamC_team_lineup_temp = teamC_team_chat.overwrites
+    temp = await ctx.guild.create_text_channel(name='team-c-선발명단', category=categoryB)
+    await temp.edit(overwrites=teamC_team_lineup_temp)
+    await teamC_team_lineup.delete()
+    #  - 출석조사
+    teamC_team_check = get(ctx.guild.channels, name='team-c-출석조사')
+    teamC_team_check_temp = teamC_team_chat.overwrites
+    temp = await ctx.guild.create_text_channel(name='team-c-출석조사', category=categoryB)
+    await temp.edit(overwrites=teamC_team_check_temp)
+    await teamC_team_check.delete()
+    #  - 불참-인원관리
+    teamC_team_out = get(ctx.guild.channels, name='불참-인원-관리')
+    teamC_team_out_temp = teamC_team_chat.overwrites
+    temp = await ctx.guild.create_text_channel(name='불참-인원-관리', category=categoryB)
+    await temp.edit(overwrites=teamC_team_out_temp)
+    await teamC_team_out.delete()
+    #  - 주장-토크
+    teamC_team_coach = get(ctx.guild.channels, name='주장-토크')
+    teamC_team_coach_temp = teamC_team_chat.overwrites
+    temp = await ctx.guild.create_text_channel(name='주장-토크', category=categoryB)
+    await temp.edit(overwrites=teamC_team_coach_temp)
+    await teamC_team_coach.delete()
+
+@bot.command()
+async def 테(ctx):
+    pass
+
 
 @bot.event
 async def on_reaction_add(reaction, user):
