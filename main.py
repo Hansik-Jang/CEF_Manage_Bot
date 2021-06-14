@@ -47,9 +47,91 @@ async def on_ready():
 
 
 @bot.command()
-async def 테스(ctx):
+async def test(ctx, role: discord.Role, result):
+    cell_max = worksheet_career.acell('A1').value
+    # 범위 내 셀 값 로딩
+    range_list = worksheet_career.range('E2:E' + cell_max)
+
+    for member in role.members:
+        print(fun.convertNickname(member.display_name))
+        nickname = fun.convertNickname(member.display_name)
+        if result == '1위':
+            for i, cell in enumerate(range_list):
+                if str(cell.value) == str(nickname) :
+                    check = i + 2
+                    before_price = worksheet_career.acell('S' + str(check)).value
+                    now_price = float(before_price) * 120 / 100
+                    worksheet_career.update_acell('S' + str(check), str(now_price))
+                    print(now_price)
+                    await ctx.send(content=f"<테스트 중>\n"
+                                           f"{nickname} 이적료 20% 상승 : {before_price} 만원 -> {now_price} 만원")
+@bot.command()
+async def 송(ctx, member: discord.Member):
+    await ctx.send(content=f"```<송금 완료>\n"
+                           f"보낸이 : {fun.convertNickname(ctx.author.display_name)} : \n"
+                           f"받는이 : {fun.convertNickname(member.display_name)} :```")
+
+@bot.command()
+async def 송금(ctx, member: discord.Member, send):
+    send = int(send)
+    print(type(send))
+    print('send : ', send)
+    if send > 0: # 0원 이상만 가능
+        cell_max = worksheet_career.acell('A1').value
+        # 범위 내 셀 값 로딩
+        range_list = worksheet_career.range('E2:E' + cell_max)
+        # 내 자산 차감
+        for i, cell in enumerate(range_list):
+            if str(cell.value) == str(fun.convertNickname(ctx.author.display_name)):
+                check = i + 2
+                mymoney = worksheet_career.acell('R' + str(check)).value
+                print('mymoney:', mymoney)
+                if int(mymoney) >= send:        # 갖고 있는 자산이 송금 금액보다 높을때만
+                    myaftermoney = int(mymoney) - send
+                    print('myaftermoney:', myaftermoney)
+                    worksheet_career.update_acell('R' + str(check), str(myaftermoney))
+                break
+        # 상대 자산 증가
+        print(fun.convertNickname(member.display_name))
+        if int(mymoney) >= send:
+            for j, cell in enumerate(range_list):
+                if str(cell.value) == str(fun.convertNickname(member.display_name)):
+                    check2 = j + 2
+                    mem_money = worksheet_career.acell('R' + str(check2)).value
+                    print('mem_money:', mem_money)
+                    mem_aftermoney = int(mem_money) + send
+                    print('mem_aftermoney:', mem_aftermoney)
+                    worksheet_career.update_acell('R' + str(check2), str(mem_aftermoney))
+                    break
+            await ctx.send(content=f"```<송금 완료>\n"
+                                   f"보낸이 : {fun.convertNickname(ctx.author.display_name)} : {mymoney}억원 - {send}억원 = {myaftermoney}억원\n"
+                                   f"받는이 : {fun.convertNickname(member.display_name)} : {mem_money}억원 + {send}억원 = {mem_aftermoney}억원```")
+        else:
+            await ctx.send(content=f"```<송금 오류>\n"
+                                   f"{fun.convertNickname(ctx.author.display_name)} 자금이 부족합니다.\n"
+                                   f"현재 자산 : {mymoney} 만원```")
+    else:
+        await ctx.send("0원 이상만 송금 가능합니다.")
+
+@bot.command()
+async def 테스(ctx, member: discord.Member, text):
+    name = member.display_name.split('[')
     role_names = [role.name for role in ctx.author.roles]
-    print(role_names)
+    if "스태프" in role_names:
+        # 범위(체크)
+        cell_max = worksheet_list.acell('A1').value
+        # 범위 내 셀 값 로딩
+        range_list = worksheet_list.range('E2:E' + cell_max)
+        temp = member.display_name.split('[')
+        nickname = temp[0]
+        # 스프레드 체크 및 업데이트
+        if text == '선수':
+            for i, cell in enumerate(range_list) :
+                if str(cell.value) == str(nickname) :
+                    check = i + 2
+                    before_price = worksheet_career.acell('Q' + str(check)).value
+                    now_price = int(before_price) * 120 / 100
+                    print(now_price)
 
 
 @bot.command()
@@ -407,7 +489,7 @@ async def 탈퇴(ctx):
 
 # 닉네임 검색
 @bot.command()
-async def 검색(ctx, *, nickname):
+async def 검색(ctx, nickname):
     overlap_check = 0
     # 범위(체크)
     cell_max = worksheet_list.acell('A1').value
@@ -448,7 +530,6 @@ async def 리셋(ctx):
             break
         else:
             overlap_check = 0'''
-    #if overlap_check == 0:
     if "," in ctx.author.display_name:
         await ctx.send("```정확한 닉네임 양식을 지켜주세요\n"
                        "주 포지션과 부 포지션의 구분은 '/'을 사용해주세요.\n"
@@ -480,7 +561,7 @@ async def 리셋(ctx):
                     key1 = 0
             await ctx.send(content=f"```{ctx.author.display_name}님의 닉네임, 주포지션, 부포지션이 재업데이트 되었습니다.\n"
                                    f"서버 내 별명 : {ctx.author.display_name}, 닉네임 : {nickname}\n"
-                                   f"주포지션 : {jupo}, 부포지션 : {bupo}"
+                                   f"주포지션 : {jupo}, 부포지션 : {bupo}\n"
                                    f"자세한 사항은 %시트링크 명령어를 입력하여, 시트에서 확인해주세요.```")
         else:
             a = temp[1].split(']')
@@ -500,7 +581,7 @@ async def 리셋(ctx):
                     key1 = 0
             await ctx.send(content=f"```{ctx.author.display_name}님의 닉네임, 주포지션, 부포지션이 재업데이트 되었습니다.\n"
                                    f"서버 내 별명 : {ctx.author.display_name}, 닉네임 : {nickname}\n"
-                                   f"주포지션 : {jupo}, 부포지션 : 없음"
+                                   f"주포지션 : {jupo}, 부포지션 : 없음\n"
                                    f"자세한 사항은 %시트링크 명령어를 입력하여, 시트에서 확인해주세요.```")
     '''else:
         await ctx.send(content=f"{ctx.author.mention}\n"
@@ -862,13 +943,18 @@ async def 커리어(ctx, text, member: discord.Member):
             for i, cell in enumerate(range_list):
                 if str(cell.value) == str(nickname):
                     check = i + 2
+                    # 우승 횟수
                     before = worksheet_career.acell('F' + str(check)).value
                     now = int(before) + 1
                     worksheet_career.update_acell('F' + str(check), str(now))
+                    before_price = worksheet_career.acell('F' + str(check)).value
+                    now_price = before_price * 120 / 100
+
                     key = 1
                     await ctx.send(content=f"```cs\n"
                                            f"{name[0]}님의 선수 커리어가 정상적으로 업데이트되었습니다.\n"
                                            f"이전 선수 우승횟수 : {before} --> 현재 선수 우승횟수 : {now}```")
+
                     break
                 else:
                     key = 0
@@ -929,6 +1015,7 @@ async def 내정보(ctx):
             before_val = worksheet_career.acell('O' + str(check)).value
             naejeon = worksheet_career.acell('P' + str(check)).value
             price = worksheet_career.acell('Q' + str(check)).value
+            wallet = worksheet_career.acell('R' + str(check)).value
 
     if key == 1:
         if "/" in ctx.author.display_name:
@@ -940,7 +1027,8 @@ async def 내정보(ctx):
             bupo = b[0]
 
             embed = discord.Embed(title=f"내 정보", description=f"{ctx.author.display_name} 님의 정보창", color=0xFF007F)
-            embed.add_field(name="이적료", value=price + " 억원", inline=False)
+            embed.add_field(name="이적료", value=price + " 억원", inline=True)
+            embed.add_field(name="자산", value=price + " 만원", inline=True)
             embed.add_field(name="소속팀", value=f"{team}", inline=True)
             embed.add_field(name="주포지션", value=jupo, inline=True)
             embed.add_field(name="부포지션", value=bupo, inline=True)
@@ -968,7 +1056,8 @@ async def 내정보(ctx):
             bupo = "없음"
 
             embed = discord.Embed(title=f"내 정보", description=f"{ctx.author.display_name} 님의 정보창", color=0xFF007F)
-            embed.add_field(name="이적료", value=price + " 억원", inline=False)
+            embed.add_field(name="이적료", value=price + " 억원", inline=True)
+            embed.add_field(name="자산", value=price + " 만원", inline=True)
             embed.add_field(name="소속팀", value=f"{team}", inline=True)
             embed.add_field(name="주포지션", value=jupo, inline=True)
             embed.add_field(name="부포지션", value=bupo, inline=True)
