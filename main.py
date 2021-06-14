@@ -47,8 +47,10 @@ async def on_ready():
 
 
 @bot.command()
-async def 테스트(ctx):
-    pass
+async def 테스(ctx):
+    role_names = [role.name for role in ctx.author.roles]
+    print(role_names)
+
 
 @bot.command()
 async def 시트링크(ctx):
@@ -229,7 +231,6 @@ async def 가입안내(ctx):
 
 @bot.command()
 async def 가입(ctx):
-    join_key = 1
     key = 0
     now = datetime.datetime.now()
     now_time = now.strftime('%Y-%m-%d %H:%M:%S')
@@ -241,28 +242,39 @@ async def 가입(ctx):
     # 범위 내 셀 값 로딩
     range_list = worksheet_list.range('D2:D' + str(cell_data))
     overlap_list = worksheet_list.range('E2:E' + str(cell_max))
-    for cell in range_list:
+    # 가입 여부 체크
+    for i, cell in enumerate(range_list):
         if str(cell.value) == str(ctx.author.id):
-            join_key = 0
+            join_point = i + 2
+            join_key = True
             break
         else:
-            join_key = 1
-
+            join_key = False
     temp = ctx.author.display_name.split('[')
     nickname = temp[0]
-    # 스프레드 체크 및 업데이트
+    # 닉네임 중복 체크
     for i, cell in enumerate(overlap_list):
         if str(cell.value) == nickname or str(cell.value) == (nickname + " "):
-            overlap_check = 1
+            ovr_point = i + 2
+            overlap_check = True
             break
         else:
-            overlap_check = 0
-    print(overlap_check)
+            overlap_check = False
+
+    print(join_key, overlap_check)
+    # 역할 및 채널세팅
+    user = ctx.author
+    cefRole = get(ctx.guild.roles, name='CEF')
+    newRole = get(ctx.guild.roles, name='신규')
+    channel = get(ctx.guild.channels, name='가입-탈퇴-명단')
+    role_names = [role.name for role in ctx.author.roles]
+    print(role_names)
     # 닉네임 양식 체크, 분리 및 시트 등록
-    # answer == 3:
-    if overlap_check == 0:
-        if join_key == 1:
-            # 범위 내 셀 값 로딩
+    #  - 신규 가입 & 닉네임 중복 아닐 경우
+    if 'CEF' not in role_names:
+        print('a')
+        if overlap_check == False and join_key == False:
+            print('신규, 닉네임 중복 없음')
             # 스프레드 체크 및 업데이트
             if "," in ctx.author.display_name:
                 await ctx.send("```정확한 닉네임 양식을 지켜주세요\n"
@@ -287,18 +299,13 @@ async def 가입(ctx):
                             ["", now_time, display_name, id_num, nickname, jupo, bupo, '무소속',
                              '0000-00-00 00:00:00'], int(cell_max) + 1)
                         worksheet_career.insert_row(
-                            ["", now_time, display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ], int(cell_max) + 1)
+                            ["", now_time, display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0], int(cell_max) + 1)
                         await ctx.send(content=f"```{ctx.author.display_name}님 정상 등록되었습니다.```")
-                        user = ctx.author
-                        role = get(ctx.guild.roles, name='CEF')
-                        role2 = get(ctx.guild.roles, name='신규')
-                        await user.add_roles(role)
-                        await user.add_roles(role2)
-                        channel = bot.get_channel(709025283306684457)
-                        await channel.send(content=f"{ctx.author.mention} 신규가입")
-                        channel2 = bot.get_channel(713717100769837126)
-                        await channel2.send(content=f"가입일자 : {now_time}\n"
-                                                    f"{ctx.author.mention}")
+                        await user.add_roles(cefRole)
+                        await user.add_roles(newRole)
+                        await user.edit(nick=display_name)
+                        await ctx.send("```가입을 환영합니다!```")
+                        await channel.send(content=f"<신규가입> {ctx.author.mention} (가입일자 : {now_time})")
                 else:
                     a = temp[1].split(']')
                     jupo = a[0]
@@ -308,34 +315,70 @@ async def 가입(ctx):
                         ["", now_time, display_name, id_num, nickname, jupo, '', '무소속',
                          '0000-00-00 00:00:00'], int(cell_max) + 1)
                     worksheet_career.insert_row(
-                        ["", now_time, display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0], int(cell_max) + 1)
+                        ["", now_time, display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0], int(cell_max) + 1)
                     await ctx.send(content=f"```{ctx.author.display_name}님 정상 등록되었습니다.```")
-                    user = ctx.author
-                    role = get(ctx.guild.roles, name='CEF')
-                    role2 = get(ctx.guild.roles, name='신규')
-                    await user.add_roles(role)
-                    await user.add_roles(role2)
-                    channel = bot.get_channel(709025283306684457)
-                    await channel.send(content=f"{ctx.author.mention} 신규가입")
-                    channel2 = bot.get_channel(713717100769837126)
-                    await channel2.send(content=f"가입일자 : {now_time}\n"
-                                                f"{ctx.author.mention}")
+                    await user.add_roles(cefRole)
+                    await user.add_roles(newRole)
+                    await user.edit(nick=display_name)
+                    await ctx.send("```가입을 환영합니다!```")
+                    await channel.send(content=f"<신규가입> {ctx.author.mention} (가입일자 : {now_time})")
 
             else:
                 await ctx.send("```정확한 닉네임 양식을 지켜주세요\n닉네임 양식 : 닉네임[주포지션/부포지션] or 닉네임[주포지션]```")
-        else:
-            await ctx.send(content=f"{ctx.author.mention} 님은 이미 가입되었습니다.")
+        # 재가입 & 닉네임 중복 없을 경우
+        elif join_key and overlap_check == False:
+            print('재가입, 닉네임 중복 없음')
+            worksheet_list.update_acell('C' + str(join_point), ctx.author.display_name)
+            worksheet_career.update_acell('C' + str(join_point), ctx.author.display_name)
+            worksheet_list.update_acell('E' + str(join_point), nickname)
+            worksheet_career.update_acell('E' + str(join_point), nickname)
+            if '/' in temp[1] :
+                a = temp[1].split('/')
+                jupo = a[0]
+                b = a[1].split(']')
+                bupo = b[0]
+                worksheet_list.update_acell('F' + str(join_point), jupo)
+                worksheet_list.update_acell('G' + str(join_point), bupo)
+            else:
+                a = temp[1].split(']')
+                jupo = a[0]
+                worksheet_list.update_acell('F' + str(join_point), jupo)
+                worksheet_list.update_acell('G' + str(join_point), '')
+
+            user = ctx.author
+            role = get(ctx.guild.roles, name='CEF')
+            await user.add_roles(role)
+            channel = get(ctx.guild.channels, name='가입-탈퇴-명단')
+            await ctx.send("```복귀를 환영합니다!```")
+            await channel.send(content=f"<재가입> {ctx.author.mention} (가입일자 : {now_time})")
+
+        # 신규 & 닉네임 중복일 경우
+        elif join_key == False and overlap_check:
+            print('신규, 닉네임 중복 있음')
+            await ctx.send("```해당 닉네임은 이미 다른 유저가 사용 중입니다.\n"
+                               "다른 닉네임으로 등록해주세요.```"
+                               "%검색 닉네임 명령어를 사용하여 사용하고 있는 닉네임을 검색할 수 있습니다.```")
+        # 재가입 & 닉네임 중복일 경우
+        elif overlap_check and join_key:
+            print('재가입, 닉네임 중복 있음')
+            print(ovr_point)
+            overlap_id = worksheet_list.acell('D' + str(join_point)).value
+            # 중복이 본인일 경우
+            print(str(overlap_id), str(ctx.author.id))
+            if str(overlap_id) == str(ctx.author.id):
+                print("중복이 본인임")
+                await user.add_roles(cefRole)
+                await ctx.send("```복귀를 환영합니다!```")
+                await channel.send(content=f"<재가입> {ctx.author.mention} (가입일자 : {now_time})")
+            # 중복이 타 유저일 경우
+            else:
+                print("중복이 타인임")
+                await ctx.send(content=f"{ctx.author.mention}\n"
+                                       f"```해당 닉네임은 다른 유저가 이미 사용 중입니다.\n"
+                                       f"다른 닉네임으로 변경해주세요.\n"
+                                       f"%검색 닉네임 명령어를 사용하여 사용하고 있는 닉네임을 검색할 수 있습니다.```")
     else:
-        await ctx.send(content=f"{ctx.author.mention}\n"
-                               f"```해당 닉네임은 이미 사용 중입니다.\n"
-                               f"다른 닉네임으로 변경해주세요.\n"
-                               f"%검색 닉네임 명령어를 사용하여 사용하고 있는 닉네임을 검색할 수 있습니다.```")
-
-    # answer == 2:
-    #    await ctx.send("```'1번. 클럽원 간의 과도한 경쟁' 은 정답이 아닙니다.```")
-    # elif answer == 4:
-    #    await ctx.send("```'3번. 반말 사용 등 클럽원간의 과한 친목' 은 C.E.F에서 가장 금지시 하는 행위입니다.```")
-
+        await ctx.send(content=f"```이미 가입되었습니다.```")
 
 # 탈퇴
 @bot.command()
