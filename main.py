@@ -66,13 +66,19 @@ async def test(ctx, role: discord.Role, result):
                     await ctx.send(content=f"<테스트 중>\n"
                                            f"{nickname} 이적료 20% 상승 : {before_price} 만원 -> {now_price} 만원")
 @bot.command()
-async def 송(ctx, member: discord.Member):
-    await ctx.send(content=f"```<송금 완료>\n"
-                           f"보낸이 : {fun.convertNickname(ctx.author.display_name)} : \n"
-                           f"받는이 : {fun.convertNickname(member.display_name)} :```")
+async def 환(ctx):
+    role = get(ctx.guild.roles, name='CEF')
+    count = 0
+    for member in role.members:
+        await ctx.send(content=f"{fun.convertNickname(member.display_name)}")
+        count += 1
+    await ctx.send(content=f"{count} 명")
+
 
 @bot.command()
 async def 송금(ctx, member: discord.Member, send):
+    print(send)
+    send = send.replace(',', '')
     send = int(send)
     print(type(send))
     print('send : ', send)
@@ -84,32 +90,31 @@ async def 송금(ctx, member: discord.Member, send):
         for i, cell in enumerate(range_list):
             if str(cell.value) == str(fun.convertNickname(ctx.author.display_name)):
                 check = i + 2
-                mymoney = worksheet_career.acell('R' + str(check)).value
-                print('mymoney:', mymoney)
-                if int(mymoney) >= send:        # 갖고 있는 자산이 송금 금액보다 높을때만
+                mymoney = int(worksheet_career.acell('R' + str(check)).value.replace(',', ''))
+                if int(mymoney) >= int(send):        # 갖고 있는 자산이 송금 금액보다 높을때만
                     myaftermoney = int(mymoney) - send
                     print('myaftermoney:', myaftermoney)
                     worksheet_career.update_acell('R' + str(check), str(myaftermoney))
-                break
-        # 상대 자산 증가
-        print(fun.convertNickname(member.display_name))
-        if int(mymoney) >= send:
-            for j, cell in enumerate(range_list):
-                if str(cell.value) == str(fun.convertNickname(member.display_name)):
-                    check2 = j + 2
-                    mem_money = worksheet_career.acell('R' + str(check2)).value
-                    print('mem_money:', mem_money)
-                    mem_aftermoney = int(mem_money) + send
-                    print('mem_aftermoney:', mem_aftermoney)
-                    worksheet_career.update_acell('R' + str(check2), str(mem_aftermoney))
-                    break
-            await ctx.send(content=f"```<송금 완료>\n"
-                                   f"보낸이 : {fun.convertNickname(ctx.author.display_name)} : {mymoney}억원 - {send}억원 = {myaftermoney}억원\n"
-                                   f"받는이 : {fun.convertNickname(member.display_name)} : {mem_money}억원 + {send}억원 = {mem_aftermoney}억원```")
-        else:
-            await ctx.send(content=f"```<송금 오류>\n"
-                                   f"{fun.convertNickname(ctx.author.display_name)} 자금이 부족합니다.\n"
-                                   f"현재 자산 : {mymoney} 만원```")
+
+                    for j, cell in enumerate(range_list):
+                        if str(cell.value) == str(fun.convertNickname(member.display_name)):
+                            check2 = j + 2
+                            mem_money = int(worksheet_career.acell('R' + str(check2)).value.replace(',', ''))
+                            print('mem_money:', mem_money)
+                            mem_aftermoney = int(mem_money) + send
+                            print('mem_aftermoney:', mem_aftermoney)
+                            worksheet_career.update_acell('R' + str(check2), str(mem_aftermoney))
+                            break
+                    await ctx.send(content=f"```<송금 완료>\n"
+                                           f"송금 금액 : {fun.caculateUnit(send)}\n"
+                                           f"보낸이 : {fun.convertNickname(ctx.author.display_name)}\n"
+                                           f"{fun.caculateUnit(mymoney)} - {fun.caculateUnit(send)} = {fun.caculateUnit(myaftermoney)}\n"
+                                           f"받는이 : {fun.convertNickname(member.display_name)}\n"
+                                           f"{fun.caculateUnit(mem_money)} + {fun.caculateUnit(send)} = {fun.caculateUnit(mem_aftermoney)}```")
+                else:
+                    await ctx.send(content=f"```<송금 오류>\n"
+                                           f"{fun.convertNickname(ctx.author.display_name)} 잔액이 부족합니다.\n"
+                                           f"현재 자산 : {mymoney} 만원```")
     else:
         await ctx.send("0원 이상만 송금 가능합니다.")
 
@@ -2084,16 +2089,16 @@ async def 리그초기화(ctx):
     temp = await ctx.guild.create_text_channel(name='team-a-출석조사', category=categoryA)
     await temp.edit(overwrites=teamA_team_check_temp)
     await teamA_team_check.delete()
-    #  - 불참-인원관리
+    '''#  - 불참-인원관리
     teamA_team_out = get(ctx.guild.channels, name='불참-인원-관리')
     teamA_team_out_temp = teamA_team_chat.overwrites
     temp = await ctx.guild.create_text_channel(name='불참-인원-관리', category=categoryA)
     await temp.edit(overwrites=teamA_team_out_temp)
-    await teamA_team_out.delete()
+    await teamA_team_out.delete()'''
     #  - 주장-토크
-    teamA_team_coach = get(ctx.guild.channels, name='주장-토크')
+    teamA_team_coach = get(ctx.guild.channels, name='team-a-감독-토크')
     teamA_team_coach_temp = teamA_team_chat.overwrites
-    temp = await ctx.guild.create_text_channel(name='주장-토크', category=categoryA)
+    temp = await ctx.guild.create_text_channel(name='team-a-감독-토크', category=categoryA)
     await temp.edit(overwrites=teamA_team_coach_temp)
     await teamA_team_coach.delete()
 
@@ -2123,16 +2128,17 @@ async def 리그초기화(ctx):
     temp = await ctx.guild.create_text_channel(name='team-b-출석조사', category=categoryB)
     await temp.edit(overwrites=teamB_team_check_temp)
     await teamB_team_check.delete()
+    '''
     #  - 불참-인원관리
     teamB_team_out = get(ctx.guild.channels, name='불참-인원-관리')
     teamB_team_out_temp = teamB_team_out.overwrites
     temp = await ctx.guild.create_text_channel(name='불참-인원-관리', category=categoryB)
     await temp.edit(overwrites=teamB_team_out_temp)
-    await teamB_team_out.delete()
+    await teamB_team_out.delete() '''
     #  - 주장-토크
-    teamB_team_coach = get(ctx.guild.channels, name='주장-토크')
+    teamB_team_coach = get(ctx.guild.channels, name='team-b-감독-토크')
     teamB_team_coach_temp = teamB_team_coach.overwrites
-    temp = await ctx.guild.create_text_channel(name='주장-토크', category=categoryB)
+    temp = await ctx.guild.create_text_channel(name='team-b-감독-토크', category=categoryB)
     await temp.edit(overwrites=teamB_team_coach_temp)
     await teamB_team_coach.delete()
 
@@ -2162,16 +2168,16 @@ async def 리그초기화(ctx):
     temp = await ctx.guild.create_text_channel(name='team-c-출석조사', category=categoryB)
     await temp.edit(overwrites=teamC_team_check_temp)
     await teamC_team_check.delete()
-    #  - 불참-인원관리
+    '''#  - 불참-인원관리
     teamC_team_out = get(ctx.guild.channels, name='불참-인원-관리')
     teamC_team_out_temp = teamC_team_out.overwrites
     temp = await ctx.guild.create_text_channel(name='불참-인원-관리', category=categoryB)
     await temp.edit(overwrites=teamC_team_out_temp)
-    await teamC_team_out.delete()
+    await teamC_team_out.delete()'''
     #  - 주장-토크
-    teamC_team_coach = get(ctx.guild.channels, name='주장-토크')
+    teamC_team_coach = get(ctx.guild.channels, name='team-c-감독-토크')
     teamC_team_coach_temp = teamC_team_coach.overwrites
-    temp = await ctx.guild.create_text_channel(name='주장-토크', category=categoryB)
+    temp = await ctx.guild.create_text_channel(name='team-c-감독-토크', category=categoryB)
     await temp.edit(overwrites=teamC_team_coach_temp)
     await teamC_team_coach.delete()
 
