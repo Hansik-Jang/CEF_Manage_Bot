@@ -57,7 +57,7 @@ async def test(ctx, role: discord.Role, result):
         nickname = fun.convertNickname(member.display_name)
         if result == '1위':
             for i, cell in enumerate(range_list):
-                if str(cell.value) == str(nickname) :
+                if str(cell.value) == str(nickname):
                     check = i + 2
                     before_price = worksheet_career.acell('S' + str(check)).value
                     now_price = float(before_price) * 120 / 100
@@ -67,12 +67,10 @@ async def test(ctx, role: discord.Role, result):
                                            f"{nickname} 이적료 20% 상승 : {before_price} 만원 -> {now_price} 만원")
 @bot.command()
 async def 환(ctx):
-    role = get(ctx.guild.roles, name='CEF')
-    count = 0
-    for member in role.members:
-        await ctx.send(content=f"{fun.convertNickname(member.display_name)}")
-        count += 1
-    await ctx.send(content=f"{count} 명")
+    pass
+
+
+
 
 
 @bot.command()
@@ -1032,6 +1030,7 @@ async def 내정보(ctx):
             bupo = b[0]
 
             embed = discord.Embed(title=f"내 정보", description=f"{ctx.author.display_name} 님의 정보창", color=0xFF007F)
+            embed.set_thumbnail(url=ctx.author.avatar_url)
             embed.add_field(name="이적료", value=price + " 억원", inline=True)
             embed.add_field(name="자산", value=price + " 만원", inline=True)
             embed.add_field(name="소속팀", value=f"{team}", inline=True)
@@ -1040,8 +1039,6 @@ async def 내정보(ctx):
             embed.add_field(name="우승 기록", value=f"선수 : {player_win} 회\n"
                                                   f"코치 : {coach_win} 회\n"
                                                   f"내전 리그 : {naejeon} 회", inline=True)
-
-
             embed.add_field(name="수상 내역", value=f"토츠 : 총 {total_to} 회\n"
                                                   f"- FW : {to_fw} 회\n"
                                                   f"- MF : {to_mf} 회\n"
@@ -1061,6 +1058,7 @@ async def 내정보(ctx):
             bupo = "없음"
 
             embed = discord.Embed(title=f"내 정보", description=f"{ctx.author.display_name} 님의 정보창", color=0xFF007F)
+            embed.set_thumbnail(url=ctx.author.avatar_url)
             embed.add_field(name="이적료", value=price + " 억원", inline=True)
             embed.add_field(name="자산", value=price + " 만원", inline=True)
             embed.add_field(name="소속팀", value=f"{team}", inline=True)
@@ -1069,8 +1067,6 @@ async def 내정보(ctx):
             embed.add_field(name="우승 기록", value=f"선수 : {player_win} 회\n"
                                                   f"코치 : {coach_win} 회\n"
                                                   f"내전 리그 : {naejeon} 회", inline=True)
-
-
             embed.add_field(name="수상 내역", value=f"토츠 : 총 {total_to} 회\n"
                                                   f"- FW : {to_fw} 회\n"
                                                   f"- MF : {to_mf} 회\n"
