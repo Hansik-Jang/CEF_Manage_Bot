@@ -1,12 +1,14 @@
 def teamNameConvert(name):
-    if name == "A" or name == 'a':
+    if name == "A" or name == 'a' or name == 'TEAM_A':
         return 'TEAM_A'
-    elif name == "B" or name == 'b':
+    elif name == "B" or name == 'b' or name == 'TEAM_B':
         return 'TEAM_B'
-    elif name == "C" or name == 'c':
+    elif name == "C" or name == 'c' or name == 'TEAM_C':
         return 'TEAM_C'
-    elif name == "D" or name == 'd':
+    elif name == "D" or name == 'd' or name == 'TEAM_D':
         return 'TEAM_D'
+    else:
+        return 'error'
 
 def convertNickname(name):
     temp = name.split('[')
@@ -54,3 +56,19 @@ def caculateUnit(money):
         won = money % 10000
         text = str(won) + " 원"
         return text
+
+def convertCheck(teamlist, pos):
+    text = ''
+    pos2 = pos.upper()
+    for player in teamlist:
+        if player[2] == '체크':
+            if player[0] == pos2:
+                text = text + player[1] + " "
+    return text
+
+def getteamlist(teamlist):
+    text = ""
+    for player in teamlist:
+        text = text + player[1] + " / " + player[0] + "\n"
+
+    return text
