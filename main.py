@@ -1294,7 +1294,7 @@ async def 출석(ctx, game):
                                                    f"출석 가능 시간 - {time_1st} 까지")
                         else :
                             worksheet_check_B.update_acell('E' + str(temp), '체크')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
                                                    f"정상적으로 출석참가 되었습니다.```")
                     elif game == '2' :
@@ -1303,7 +1303,7 @@ async def 출석(ctx, game):
                                                    f"출석 가능 시간 - {time_2nd} 까지")
                         else :
                             worksheet_check_B.update_acell('F' + str(temp), '체크')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
                                                    f"정상적으로 출석참가 되었습니다.```")
                     elif game == '3' :
@@ -1312,7 +1312,7 @@ async def 출석(ctx, game):
                                                    f"출석 가능 시간 - {time_3rd} 까지")
                         else :
                             worksheet_check_B.update_acell('G' + str(temp), '체크')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
                                                    f"정상적으로 출석참가 되었습니다.```")
                     elif game == '4' :
@@ -1321,7 +1321,7 @@ async def 출석(ctx, game):
                                                    f"출석 가능 시간 - {time_4th} 까지")
                         else :
                             worksheet_check_B.update_acell('H' + str(temp), '체크')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
                                                    f"정상적으로 출석참가 되었습니다.```")
                     else :
@@ -1343,7 +1343,7 @@ async def 출석(ctx, game):
                                                    f"출석 가능 시간 - {time_1st} 까지")
                         else:
                             worksheet_check_C.update_acell('E' + str(temp), '체크')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
                                                    f"정상적으로 출석참가 되었습니다.```")
                     elif game == '2':
@@ -1352,7 +1352,7 @@ async def 출석(ctx, game):
                                                    f"출석 가능 시간 - {time_2nd} 까지")
                         else:
                             worksheet_check_C.update_acell('F' + str(temp), '체크')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
                                                    f"정상적으로 출석참가 되었습니다.```")
                     elif game == '3':
@@ -1361,7 +1361,7 @@ async def 출석(ctx, game):
                                                    f"출석 가능 시간 - {time_3rd} 까지")
                         else:
                             worksheet_check_C.update_acell('G' + str(temp), '체크')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
                                                    f"정상적으로 출석참가 되었습니다.```")
                     elif game == '4':
@@ -1370,7 +1370,7 @@ async def 출석(ctx, game):
                                                    f"출석 가능 시간 - {time_4th} 까지")
                         else:
                             worksheet_check_C.update_acell('H' + str(temp), '체크')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
                                                    f"정상적으로 출석참가 되었습니다.```")
                     else:
@@ -1392,7 +1392,7 @@ async def 출석(ctx, game):
                                                    f"출석 가능 시간 - {time_1st} 까지")
                         else :
                             worksheet_check_D.update_acell('E' + str(temp), '체크')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
                                                    f"정상적으로 출석참가 되었습니다.```")
                     elif game == '2' :
@@ -1401,7 +1401,7 @@ async def 출석(ctx, game):
                                                    f"출석 가능 시간 - {time_2nd} 까지")
                         else :
                             worksheet_check_D.update_acell('F' + str(temp), '체크')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
                                                    f"정상적으로 출석참가 되었습니다.```")
                     elif game == '3' :
@@ -1410,7 +1410,7 @@ async def 출석(ctx, game):
                                                    f"출석 가능 시간 - {time_3rd} 까지")
                         else :
                             worksheet_check_D.update_acell('G' + str(temp), '체크')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
                                                    f"정상적으로 출석참가 되었습니다.```")
                     elif game == '4' :
@@ -1419,7 +1419,7 @@ async def 출석(ctx, game):
                                                    f"출석 가능 시간 - {time_4th} 까지")
                         else :
                             worksheet_check_D.update_acell('H' + str(temp), '체크')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
                                                    f"정상적으로 출석참가 되었습니다.```")
                     else:
@@ -1474,7 +1474,7 @@ async def 출석취소(ctx, game):
                             worksheet_check_A.update_acell('E' + str(temp), '0')
                             await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
-                                                   f"정상적으로 출석참가 되었습니다.```")
+                                                   f"출석취소 되었습니다.```")
                     elif game == '2' :
                         if time_2nd < time_now and time_now < time_after :
                             await ctx.send(content=f"2경기 출석 가능한 시간이 아닙니다.\n"
@@ -1483,7 +1483,7 @@ async def 출석취소(ctx, game):
                             worksheet_check_A.update_acell('F' + str(temp), '0')
                             await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
-                                                   f"정상적으로 출석참가 되었습니다.```")
+                                                   f"출석취소 되었습니다.```")
                     elif game == '3' :
                         if time_3rd < time_now and time_now < time_after :
                             await ctx.send(content=f"3경기 출석 가능한 시간이 아닙니다.\n"
@@ -1492,7 +1492,7 @@ async def 출석취소(ctx, game):
                             worksheet_check_A.update_acell('G' + str(temp), '0')
                             await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
-                                                   f"정상적으로 출석참가 되었습니다.```")
+                                                   f"출석취소 되었습니다.```")
                     elif game == '4' :
                         if time_4th < time_now and time_now < time_after :
                             await ctx.send(content=f"4경기 출석 가능한 시간이 아닙니다.\n"
@@ -1501,7 +1501,7 @@ async def 출석취소(ctx, game):
                             worksheet_check_A.update_acell('H' + str(temp), '0')
                             await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
-                                                   f"정상적으로 출석참가 되었습니다.```")
+                                                   f"출석취소 되었습니다.```")
                     else:
                         await ctx.send("```입력이 잘못되었습니다.```")
         else:
@@ -1519,36 +1519,36 @@ async def 출석취소(ctx, game):
                                                    f"출석 가능 시간 - {time_1st} 까지")
                         else :
                             worksheet_check_B.update_acell('E' + str(temp), '0')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
-                                                   f"정상적으로 출석참가 되었습니다.```")
+                                                   f"출석취소 되었습니다.```")
                     elif game == '2' :
                         if time_2nd < time_now and time_now < time_after :
                             await ctx.send(content=f"2경기 출석 가능한 시간이 아닙니다.\n"
                                                    f"출석 가능 시간 - {time_2nd} 까지")
                         else :
                             worksheet_check_B.update_acell('F' + str(temp), '0')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
-                                                   f"정상적으로 출석참가 되었습니다.```")
+                                                   f"출석취소 되었습니다.```")
                     elif game == '3' :
                         if time_3rd < time_now and time_now < time_after :
                             await ctx.send(content=f"3경기 출석 가능한 시간이 아닙니다.\n"
                                                    f"출석 가능 시간 - {time_3rd} 까지")
                         else :
                             worksheet_check_B.update_acell('G' + str(temp), '0')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
-                                                   f"정상적으로 출석참가 되었습니다.```")
+                                                   f"출석취소 되었습니다.```")
                     elif game == '4' :
                         if time_4th < time_now and time_now < time_after :
                             await ctx.send(content=f"4경기 출석 가능한 시간이 아닙니다.\n"
                                                    f"출석 가능 시간 - {time_4th} 까지")
                         else :
                             worksheet_check_B.update_acell('H' + str(temp), '0')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
-                                                   f"정상적으로 출석참가 되었습니다.```")
+                                                   f"출석취소 되었습니다.```")
                     else:
                         await ctx.send("```입력이 잘못되었습니다.```")
         else:
@@ -1566,36 +1566,36 @@ async def 출석취소(ctx, game):
                                                    f"출석 가능 시간 - {time_1st} 까지")
                         else :
                             worksheet_check_D.update_acell('E' + str(temp), '0')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
-                                                   f"정상적으로 출석참가 되었습니다.```")
+                                                   f"출석취소 되었습니다.```")
                     elif game == '2' :
                         if time_2nd < time_now and time_now < time_after :
                             await ctx.send(content=f"2경기 출석 가능한 시간이 아닙니다.\n"
                                                    f"출석 가능 시간 - {time_2nd} 까지")
                         else :
                             worksheet_check_D.update_acell('F' + str(temp), '0')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
-                                                   f"정상적으로 출석참가 되었습니다.```")
+                                                   f"출석취소 되었습니다.```")
                     elif game == '3' :
                         if time_3rd < time_now and time_now < time_after :
                             await ctx.send(content=f"3경기 출석 가능한 시간이 아닙니다.\n"
                                                    f"출석 가능 시간 - {time_3rd} 까지")
                         else :
                             worksheet_check_D.update_acell('G' + str(temp), '0')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
-                                                   f"정상적으로 출석참가 되었습니다.```")
+                                                   f"출석취소 되었습니다.```")
                     elif game == '4' :
                         if time_4th < time_now and time_now < time_after :
                             await ctx.send(content=f"4경기 출석 가능한 시간이 아닙니다.\n"
                                                    f"출석 가능 시간 - {time_4th} 까지")
                         else :
                             worksheet_check_D.update_acell('H' + str(temp), '0')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
-                                                   f"정상적으로 출석참가 되었습니다.```")
+                                                   f"출석취소 되었습니다.```")
                     else:
                         await ctx.send("```입력이 잘못되었습니다.```")
         else:
@@ -1613,36 +1613,36 @@ async def 출석취소(ctx, game):
                                                    f"출석 가능 시간 - {time_1st} 까지")
                         else :
                             worksheet_check_D.update_acell('E' + str(temp), '0')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
-                                                   f"정상적으로 출석참가 되었습니다.```")
+                                                   f"출석취소 되었습니다.```")
                     elif game == '2' :
                         if time_2nd < time_now and time_now < time_after :
                             await ctx.send(content=f"2경기 출석 가능한 시간이 아닙니다.\n"
                                                    f"출석 가능 시간 - {time_2nd} 까지")
                         else :
                             worksheet_check_D.update_acell('F' + str(temp), '0')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
-                                                   f"정상적으로 출석참가 되었습니다.```")
+                                                   f"출석취소 되었습니다.```")
                     elif game == '3' :
                         if time_3rd < time_now and time_now < time_after :
                             await ctx.send(content=f"3경기 출석 가능한 시간이 아닙니다.\n"
                                                    f"출석 가능 시간 - {time_3rd} 까지")
                         else :
                             worksheet_check_D.update_acell('G' + str(temp), '0')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
-                                                   f"정상적으로 출석참가 되었습니다.```")
+                                                   f"출석취소 되었습니다.```")
                     elif game == '4' :
                         if time_4th < time_now and time_now < time_after :
                             await ctx.send(content=f"4경기 출석 가능한 시간이 아닙니다.\n"
                                                    f"출석 가능 시간 - {time_4th} 까지")
                         else :
                             worksheet_check_D.update_acell('H' + str(temp), '0')
-                            await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                            await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
                                                    f"닉네임 : {ctx.author.display_name}\n"
-                                                   f"정상적으로 출석참가 되었습니다.```")
+                                                   f"출석취소 되었습니다.```")
                     else:
                         await ctx.send("```입력이 잘못되었습니다.```")
         else:
@@ -1989,7 +1989,7 @@ async def 리그초기화(ctx):
     #  - 리스트
     teamB_team_list = get(ctx.guild.channels, name='team-b™')
     teamB_team_list_temp = teamB_team_list.overwrites
-    temp = await ctx.guild.create_text_channel(name='team-b™', category=categoryA)
+    temp = await ctx.guild.create_text_channel(name='team-b™', category=categoryB)
     await temp.edit(overwrites=teamB_team_list_temp)
     await teamB_team_list.delete()
     #  - 팀채팅
@@ -2035,7 +2035,7 @@ async def 리그초기화(ctx):
     #  - 리스트
     teamC_team_list = get(ctx.guild.channels, name='team-c™')
     teamC_team_list_temp = teamC_team_list.overwrites
-    temp = await ctx.guild.create_text_channel(name='team-c™', category=categoryA)
+    temp = await ctx.guild.create_text_channel(name='team-c™', category=categoryC)
     await temp.edit(overwrites=teamC_team_list_temp)
     await teamC_team_list.delete()
     #  - 팀채팅
