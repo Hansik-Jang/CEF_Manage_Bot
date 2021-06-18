@@ -1941,12 +1941,12 @@ async def 리그초기화(ctx):
     # 채널 초기화
     # A팀 카테고리
     categoryA = get(ctx.guild.categories, name='⚽  TEAM A')
-    #  - 리스트
+    '''#  - 리스트
     teamA_team_list = get(ctx.guild.channels, name='team-a™')
     teamA_team_list_temp = teamA_team_list.overwrites
     temp = await ctx.guild.create_text_channel(name='team-a™', category=categoryA)
     await temp.edit(overwrites=teamA_team_list_temp)
-    await teamA_team_list.delete()
+    await teamA_team_list.delete()'''
     #  - 팀채팅
     teamA_team_chat = get(ctx.guild.channels, name='team-a-팀채팅')
     teamA_team_chat_temp = teamA_team_chat.overwrites
@@ -1986,12 +1986,12 @@ async def 리그초기화(ctx):
 
     # B팀 카테고리
     categoryB = get(ctx.guild.categories, name='⚽  TEAM B')
-    #  - 리스트
+    '''#  - 리스트
     teamB_team_list = get(ctx.guild.channels, name='team-b™')
     teamB_team_list_temp = teamB_team_list.overwrites
     temp = await ctx.guild.create_text_channel(name='team-b™', category=categoryB)
     await temp.edit(overwrites=teamB_team_list_temp)
-    await teamB_team_list.delete()
+    await teamB_team_list.delete()'''
     #  - 팀채팅
     teamB_team_chat = get(ctx.guild.channels, name='team-b-팀채팅')
     teamB_team_chat_temp = teamB_team_chat.overwrites
@@ -2032,12 +2032,12 @@ async def 리그초기화(ctx):
 
     # C팀 카테고리
     categoryC = get(ctx.guild.categories, name='⚽  TEAM C')
-    #  - 리스트
+    '''#  - 리스트
     teamC_team_list = get(ctx.guild.channels, name='team-c™')
     teamC_team_list_temp = teamC_team_list.overwrites
     temp = await ctx.guild.create_text_channel(name='team-c™', category=categoryC)
     await temp.edit(overwrites=teamC_team_list_temp)
-    await teamC_team_list.delete()
+    await teamC_team_list.delete()'''
     #  - 팀채팅
     teamC_team_chat = get(ctx.guild.channels, name='team-c-팀채팅')
     teamC_team_chat_temp = teamC_team_chat.overwrites
@@ -2076,35 +2076,35 @@ async def 리그초기화(ctx):
     await teamC_team_coach.delete()
 
     # D팀 카테고리
-    categoryD = get(ctx.guild.categories, name='⚽  TEAM D')
-    #  - 리스트
+    categoryD = get(ctx.guild.categories, name='⚽ TEAM D')
+    '''#  - 리스트
     teamD_team_list = get(ctx.guild.channels, name='team-d™')
     teamD_team_list_temp = teamD_team_list.overwrites
     temp = await ctx.guild.create_text_channel(name='team-d™', category=categoryD)
     await temp.edit(overwrites=teamD_team_list_temp)
-    await teamD_team_list.delete()
+    await teamD_team_list.delete()'''
     #  - 팀채팅
-    teamD_team_chat = get(ctx.guild.channels, name='team-c-팀채팅')
+    teamD_team_chat = get(ctx.guild.channels, name='team-d-팀채팅')
     teamD_team_chat_temp = teamD_team_chat.overwrites
-    temp = await ctx.guild.create_text_channel(name='team-c-팀채팅', category=categoryD)
+    temp = await ctx.guild.create_text_channel(name='team-d-팀채팅', category=categoryD)
     await temp.edit(overwrites=teamD_team_chat_temp)
     await teamD_team_chat.delete()
     #  - 전술노트
-    teamD_team_tatic = get(ctx.guild.channels, name='team-c-전술노트')
+    teamD_team_tatic = get(ctx.guild.channels, name='team-d-전술노트')
     teamD_team_tatic_temp = teamD_team_tatic.overwrites
-    temp = await ctx.guild.create_text_channel(name='team-c-전술노트', category=categoryD)
+    temp = await ctx.guild.create_text_channel(name='team-d-전술노트', category=categoryD)
     await temp.edit(overwrites=teamD_team_tatic_temp)
     await teamD_team_tatic.delete()
     #  - 선발명단
-    teamD_team_lineup = get(ctx.guild.channels, name='team-c-선발명단')
+    teamD_team_lineup = get(ctx.guild.channels, name='team-d-선발명단')
     teamD_team_lineup_temp = teamD_team_lineup.overwrites
-    temp = await ctx.guild.create_text_channel(name='team-c-선발명단', category=categoryD)
+    temp = await ctx.guild.create_text_channel(name='team-d-선발명단', category=categoryD)
     await temp.edit(overwrites=teamD_team_lineup_temp)
     await teamD_team_lineup.delete()
     #  - 출석조사
-    teamD_team_check = get(ctx.guild.channels, name='team-c-출석조사')
+    teamD_team_check = get(ctx.guild.channels, name='team-d-출석조사')
     teamD_team_check_temp = teamD_team_check.overwrites
-    temp = await ctx.guild.create_text_channel(name='team-c-출석조사', category=categoryD)
+    temp = await ctx.guild.create_text_channel(name='team-d-출석조사', category=categoryD)
     await temp.edit(overwrites=teamD_team_check_temp)
     await teamD_team_check.delete()
     '''#  - 불참-인원관리
@@ -2114,9 +2114,9 @@ async def 리그초기화(ctx):
     await temp.edit(overwrites=teamC_team_out_temp)
     await teamC_team_out.delete()'''
     #  - 주장-토크
-    teamD_team_coach = get(ctx.guild.channels, name='team-c-감독-토크')
+    teamD_team_coach = get(ctx.guild.channels, name='team-d-감독-토크')
     teamD_team_coach_temp = teamD_team_coach.overwrites
-    temp = await ctx.guild.create_text_channel(name='team-c-감독-토크', category=categoryD)
+    temp = await ctx.guild.create_text_channel(name='team-d-감독-토크', category=categoryD)
     await temp.edit(overwrites=teamD_team_coach_temp)
     await teamD_team_coach.delete()
 
