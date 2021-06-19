@@ -27,6 +27,12 @@ def convertJupo(name):
         jupo = b[0]
         return jupo
 
+def convertBupo(name):
+    a = name.split['/']
+    temp = a[1]
+    bupo = temp.replace(']', '')
+    return bupo
+
 def caculateUnit(money):
     money = int(money)
     if money >= 100000000:
@@ -72,3 +78,7 @@ def getteamlist(teamlist):
         text = text + player[1] + " / " + player[0] + "\n"
 
     return text
+
+def checklowercase(nickname):
+    nickname = nickname.lower()
+    return nickname

@@ -318,7 +318,6 @@ async def 가입안내(ctx):
 
 @bot.command()
 async def 가입(ctx):
-    key = 0
     now = datetime.datetime.now()
     now_time = now.strftime('%Y-%m-%d %H:%M:%S')
     overlap_check = 0
@@ -337,25 +336,23 @@ async def 가입(ctx):
             break
         else:
             join_key = False
-    temp = ctx.author.display_name.split('[')
-    nickname = temp[0]
+
+    nickname = fun.convertNickname(ctx.author.display_name)
     # 닉네임 중복 체크
     for i, cell in enumerate(overlap_list):
-        if str(cell.value) == nickname or str(cell.value) == (nickname + " "):
+        if fun.convertCheck(str(cell.value)) == fun.checklowercase(nickname) \
+                or fun.convertCheck(str(cell.value)) == fun.convertCheck((nickname + " ")):
             ovr_point = i + 2
             overlap_check = True
             break
         else:
             overlap_check = False
-
-    print(join_key, overlap_check)
     # 역할 및 채널세팅
     user = ctx.author
     cefRole = get(ctx.guild.roles, name='CEF')
     newRole = get(ctx.guild.roles, name='신규')
     channel = get(ctx.guild.channels, name='가입-탈퇴-명단')
     role_names = [role.name for role in ctx.author.roles]
-    print(role_names)
     # 닉네임 양식 체크, 분리 및 시트 등록
     #  - 신규 가입 & 닉네임 중복 아닐 경우
     if 'CEF' not in role_names:
@@ -374,28 +371,27 @@ async def 가입(ctx):
                                "해당 봇에서는 '.'를 인식하지 않으며, 이는 봇 고장의 원인이 됩니다.\n"
                                "닉네임 양식 : 닉네임[주포지션/부포지션] or 닉네임[주포지션]```")
             elif "[" in ctx.author.display_name:
-                if '/' in temp[1]:
-                    a = temp[1].split('/')
-                    jupo = a[0]
-                    b = a[1].split(']')
-                    bupo = b[0]
+                if '/' in ctx.author.display_name:
+                    jupo = fun.convertJupo(ctx.author.display_name)
+                    bupo = fun.convertBupo(ctx.author.display_name)
                     display_name = ctx.author.display_name + "🐤"
-                    if key == 0:
-                        id_num = "" + str(ctx.author.id)
-                        worksheet_list.insert_row(
-                            ["", now_time, display_name, id_num, nickname, jupo, bupo, '무소속',
-                             '0000-00-00 00:00:00'], int(cell_max) + 1)
-                        worksheet_career.insert_row(
-                            ["", now_time, display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0], int(cell_max) + 1)
-                        await ctx.send(content=f"```{ctx.author.display_name}님 정상 등록되었습니다.```")
-                        await user.add_roles(cefRole)
-                        await user.add_roles(newRole)
-                        await user.edit(nick=display_name)
-                        await ctx.send("```가입을 환영합니다!```")
-                        await channel.send(content=f"<신규가입> {ctx.author.mention} (가입일자 : {now_time})")
+                    id_num = "" + str(ctx.author.id)
+
+                    worksheet_list.insert_row(
+                        ["", now_time, display_name, id_num, nickname, jupo, bupo, '무소속',
+                         '0000-00-00 00:00:00'], int(cell_max) + 1)
+                    worksheet_career.insert_row(
+                        ["", now_time, display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0], int(cell_max) + 1)
+
+                    await ctx.send(content=f"```{ctx.author.display_name}님 정상 등록되었습니다.```")
+                    await user.add_roles(cefRole)
+                    await user.add_roles(newRole)
+                    await user.edit(nick=display_name)
+                    await ctx.send("```가입을 환영합니다!```")
+                    await channel.send(content=f"<신규가입> {ctx.author.mention} (가입일자 : {now_time})")
+
                 else:
-                    a = temp[1].split(']')
-                    jupo = a[0]
+                    jupo = fun.convertJupo(ctx.author.display_name)
                     id_num = "" + str(ctx.author.id)
                     display_name = ctx.author.display_name + "🐤"
                     worksheet_list.insert_row(
@@ -419,16 +415,13 @@ async def 가입(ctx):
             worksheet_career.update_acell('C' + str(join_point), ctx.author.display_name)
             worksheet_list.update_acell('E' + str(join_point), nickname)
             worksheet_career.update_acell('E' + str(join_point), nickname)
-            if '/' in temp[1] :
-                a = temp[1].split('/')
-                jupo = a[0]
-                b = a[1].split(']')
-                bupo = b[0]
+            if '/' in ctx.author.display_name:
+                jupo = fun.convertJupo(ctx.author.display_name)
+                bupo = fun.convertBupo(ctx.author.display_name)
                 worksheet_list.update_acell('F' + str(join_point), jupo)
                 worksheet_list.update_acell('G' + str(join_point), bupo)
             else:
-                a = temp[1].split(']')
-                jupo = a[0]
+                jupo = fun.convertJupo(ctx.author.display_name)
                 worksheet_list.update_acell('F' + str(join_point), jupo)
                 worksheet_list.update_acell('G' + str(join_point), '')
 
