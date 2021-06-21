@@ -1751,18 +1751,18 @@ async def 출석결과(ctx, teamname):
     time_3rd = datetime.datetime(time_now.year, time_now.month, time_now.day, 22, 20, 00)
     time_4th = datetime.datetime(time_now.year, time_now.month, time_now.day, 23, 00, 00)
     time_after = datetime.datetime(time_now.year, time_now.month, time_now.day, 23, 30, 00)
-
+    print(fun.teamNameConvert(teamname))
     if fun.teamNameConvert(teamname) == 'TEAM_A':
         # 범위(체크)
         a_max = str(int(worksheet_check_A.acell('A1').value) + 2)
         # 범위 내 셀 값 로딩
         color = 0xdf8b00
-        team_nick = worksheet_check_B.range('B3:B' + a_max)
-        team_pos = worksheet_check_B.range('D3:D' + a_max)
-        team_match1 = worksheet_check_B.range('E3:E' + a_max)
-        team_match2 = worksheet_check_B.range('E3:E' + a_max)
-        team_match3 = worksheet_check_B.range('E3:E' + a_max)
-        team_match4 = worksheet_check_B.range('E3:E' + a_max)
+        team_nick = worksheet_check_A.range('B3:B' + a_max)
+        team_pos = worksheet_check_A.range('D3:D' + a_max)
+        team_match1 = worksheet_check_A.range('E3:E' + a_max)
+        team_match2 = worksheet_check_A.range('E3:E' + a_max)
+        team_match3 = worksheet_check_A.range('E3:E' + a_max)
+        team_match4 = worksheet_check_A.range('E3:E' + a_max)
     elif fun.teamNameConvert(teamname) == 'TEAM_B':
         color = 0x8634c4
         b_max = str(int(worksheet_check_B.acell('A1').value) + 2)
@@ -1792,7 +1792,7 @@ async def 출석결과(ctx, teamname):
         team_match4 = worksheet_check_D.range('H3:H' + d_max)
     elif fun.teamNameConvert(teamname) == 'TEAM_E':
         color = 0x76fd61
-        d_max = str(int(worksheet_check_E.acell('A1').value) + 2)
+        e_max = str(int(worksheet_check_E.acell('A1').value) + 2)
         team_nick = worksheet_check_E.range('B3:B' + d_max)
         team_pos = worksheet_check_E.range('D3:D' + d_max)
         team_match1 = worksheet_check_E.range('E3:E' + d_max)
@@ -1810,7 +1810,6 @@ async def 출석결과(ctx, teamname):
             teamli4.append([team_pos[i].value, fun.convertNickname(team_nick[i].value), team_match4[i].value])
             teamliwhole.append([team_pos[i].value, fun.convertNickname(team_nick[i].value)])
         embed = discord.Embed(title=f"{fun.teamNameConvert(teamname)} 정보", description="이적 자금 : <미추가>", color=color)
-        #embed.add_field(name=f"팀 명단", value=f"{fun.getteamlist(teamliwhole)}", inline=True)
         embed.add_field(name=f"1경기 출석결과", value=f"ST:{fun.convertCheck(teamli1, 'st')}\n"
                                                     f"LW:{fun.convertCheck(teamli1, 'lw')}\n"
                                                     f"RW:{fun.convertCheck(teamli1, 'rw')}\n"
