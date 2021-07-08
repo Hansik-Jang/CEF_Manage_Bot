@@ -12,6 +12,8 @@ from oauth2client.service_account import ServiceAccountCredentials
 import gspread
 import fun
 
+TRASNFER_PERSENT = 15
+
 gc = gspread.service_account(filename='credentials.json')
 sh = gc.open_by_key('1552A1axMJDfxN7kv1TyohmJ3VqKNa7mBeQstHoIRpUQ')
 # sh2 = gc.open_by_key('1OP8XMpM93DPScaHX9hGtukf-qaZyalVgzhF--8i2e7')
@@ -48,31 +50,26 @@ async def on_ready():
 
 
 @bot.command()
-async def test(ctx, role: discord.Role, result):
-    cell_max = worksheet_career.acell('A1').value
-    # 범위 내 셀 값 로딩
-    range_list = worksheet_career.range('E2:E' + cell_max)
+async def test(ctx):
+    num = []
+    for i in range(1, 45):
+        num.append(i)
+    num_li = []
+    for i in range(6):
+        temp = random.choice(num)
+        num_li.append(temp)
+        num.remove(temp)
 
-    for member in role.members:
-        print(fun.convertNickname(member.display_name))
-        nickname = fun.convertNickname(member.display_name)
-        if result == '1':
-            for i, cell in enumerate(range_list):
-                if str(cell.value) == str(nickname):
-                    check = i + 2
-                    before_price = worksheet_career.acell('S' + str(check)).value
-                    now_price = float(before_price) * 120 / 100
-                    worksheet_career.update_acell('S' + str(check), str(now_price))
-                    print(now_price)
-                    await ctx.send(content=f"<테스트 중>\n"
-                                           f"{nickname} 이적료 20% 상승 : {before_price} 만원 -> {now_price} 만원")
+    num_li.sort()
+    text = ''
+    for nu in num_li:
+        text = text + str(nu) + ', '
+    await ctx.send(content=f"로또 번호 : {text}")
 
 
 @bot.command()
 async def 테(ctx):
-    role = get(ctx.guild.roles, name="이벤트전 우승")
-    for member in role.members:
-        print(fun.convertNickname(member.display_name))
+    await ctx.send(content=f"테스트 닉네임 = {fun.convertNickname(ctx.author.display_name)}")
 
 
 @bot.command()
@@ -340,8 +337,8 @@ async def 가입(ctx):
     nickname = fun.convertNickname(ctx.author.display_name)
     # 닉네임 중복 체크
     for i, cell in enumerate(overlap_list):
-        if fun.convertCheck(str(cell.value)) == fun.checklowercase(nickname) \
-                or fun.convertCheck(str(cell.value)) == fun.convertCheck((nickname + " ")):
+        if fun.convertNickname(str(cell.value)) == fun.checklowercase(nickname) \
+                or fun.convertNickname(str(cell.value)) == fun.checklowercase((nickname + " ")):
             ovr_point = i + 2
             overlap_check = True
             break
@@ -1745,12 +1742,6 @@ async def 출석결과(ctx, teamname):
     teamli4 = []
     teamliwhole = []
     switch = True
-    time_now = datetime.datetime.now()
-    time_1st = datetime.datetime(time_now.year, time_now.month, time_now.day, 21, 00, 00)
-    time_2nd = datetime.datetime(time_now.year, time_now.month, time_now.day, 21, 40, 00)
-    time_3rd = datetime.datetime(time_now.year, time_now.month, time_now.day, 22, 20, 00)
-    time_4th = datetime.datetime(time_now.year, time_now.month, time_now.day, 23, 00, 00)
-    time_after = datetime.datetime(time_now.year, time_now.month, time_now.day, 23, 30, 00)
     print(fun.teamNameConvert(teamname))
     if fun.teamNameConvert(teamname) == 'TEAM_A':
         # 범위(체크)
@@ -1760,27 +1751,27 @@ async def 출석결과(ctx, teamname):
         team_nick = worksheet_check_A.range('B3:B' + a_max)
         team_pos = worksheet_check_A.range('D3:D' + a_max)
         team_match1 = worksheet_check_A.range('E3:E' + a_max)
-        team_match2 = worksheet_check_A.range('E3:E' + a_max)
-        team_match3 = worksheet_check_A.range('E3:E' + a_max)
-        team_match4 = worksheet_check_A.range('E3:E' + a_max)
+        team_match2 = worksheet_check_A.range('F3:F' + a_max)
+        team_match3 = worksheet_check_A.range('G3:G' + a_max)
+        team_match4 = worksheet_check_A.range('H3:H' + a_max)
     elif fun.teamNameConvert(teamname) == 'TEAM_B':
         color = 0x8634c4
         b_max = str(int(worksheet_check_B.acell('A1').value) + 2)
         team_nick = worksheet_check_B.range('B3:B' + b_max)
         team_pos = worksheet_check_B.range('D3:D' + b_max)
         team_match1 = worksheet_check_B.range('E3:E' + b_max)
-        team_match2 = worksheet_check_B.range('E3:E' + b_max)
-        team_match3 = worksheet_check_B.range('E3:E' + b_max)
-        team_match4 = worksheet_check_B.range('E3:E' + b_max)
+        team_match2 = worksheet_check_B.range('F3:F' + b_max)
+        team_match3 = worksheet_check_B.range('G3:G' + b_max)
+        team_match4 = worksheet_check_B.range('H3:H' + b_max)
     elif fun.teamNameConvert(teamname) == 'TEAM_C':
         color = 0xfff400
         c_max = str(int(worksheet_check_C.acell('A1').value) + 2)
         team_nick = worksheet_check_C.range('B3:B' + c_max)
         team_pos = worksheet_check_C.range('D3:D' + c_max)
         team_match1 = worksheet_check_C.range('E3:E' + c_max)
-        team_match2 = worksheet_check_C.range('E3:E' + c_max)
-        team_match3 = worksheet_check_C.range('E3:E' + c_max)
-        team_match4 = worksheet_check_C.range('E3:E' + c_max)
+        team_match2 = worksheet_check_C.range('F3:F' + c_max)
+        team_match3 = worksheet_check_C.range('G3:G' + c_max)
+        team_match4 = worksheet_check_C.range('H3:H' + c_max)
     elif fun.teamNameConvert(teamname) == 'TEAM_D':
         color = 0xff67ff
         d_max = str(int(worksheet_check_D.acell('A1').value) + 2)
@@ -1793,12 +1784,12 @@ async def 출석결과(ctx, teamname):
     elif fun.teamNameConvert(teamname) == 'TEAM_E':
         color = 0x76fd61
         e_max = str(int(worksheet_check_E.acell('A1').value) + 2)
-        team_nick = worksheet_check_E.range('B3:B' + d_max)
-        team_pos = worksheet_check_E.range('D3:D' + d_max)
-        team_match1 = worksheet_check_E.range('E3:E' + d_max)
-        team_match2 = worksheet_check_E.range('F3:F' + d_max)
-        team_match3 = worksheet_check_E.range('G3:G' + d_max)
-        team_match4 = worksheet_check_E.range('H3:H' + d_max)
+        team_nick = worksheet_check_E.range('B3:B' + e_max)
+        team_pos = worksheet_check_E.range('D3:D' + e_max)
+        team_match1 = worksheet_check_E.range('E3:E' + e_max)
+        team_match2 = worksheet_check_E.range('F3:F' + e_max)
+        team_match3 = worksheet_check_E.range('G3:G' + e_max)
+        team_match4 = worksheet_check_E.range('H3:H' + e_max)
     elif fun.teamNameConvert(teamname) == 'error':
         switch = False
 
@@ -1810,46 +1801,50 @@ async def 출석결과(ctx, teamname):
             teamli4.append([team_pos[i].value, fun.convertNickname(team_nick[i].value), team_match4[i].value])
             teamliwhole.append([team_pos[i].value, fun.convertNickname(team_nick[i].value)])
         embed = discord.Embed(title=f"{fun.teamNameConvert(teamname)} 정보", description="이적 자금 : <미추가>", color=color)
-        embed.add_field(name=f"1경기 출석결과", value=f"ST:{fun.convertCheck(teamli1, 'st')}\n"
-                                                    f"LW:{fun.convertCheck(teamli1, 'lw')}\n"
-                                                    f"RW:{fun.convertCheck(teamli1, 'rw')}\n"
-                                                    f"CAM:{fun.convertCheck(teamli1, 'cam')}\n"
-                                                    f"CM:{fun.convertCheck(teamli1, 'cm')}\n"
-                                                    f"CDM:{fun.convertCheck(teamli1, 'cdm')}\n"
-                                                    f"LB:{fun.convertCheck(teamli1, 'lb')}\n"
-                                                    f"CB:{fun.convertCheck(teamli1, 'cb')}\n"
-                                                    f"RB:{fun.convertCheck(teamli1, 'rb')}\n"
-                                                    f"GK:{fun.convertCheck(teamli1, 'gk')}\n", inline=True)
-        embed.add_field(name="2경기 출석결과", value=f"ST:{fun.convertCheck(teamli1, 'st')}\n"
-                                                   f"LW:{fun.convertCheck(teamli2, 'lw')}\n"
-                                                   f"RW:{fun.convertCheck(teamli2, 'rw')}\n"
-                                                   f"CAM:{fun.convertCheck(teamli2, 'cam')}\n"
-                                                   f"CM:{fun.convertCheck(teamli2, 'cm')}\n"
-                                                   f"CDM:{fun.convertCheck(teamli2, 'cdm')}\n"
-                                                   f"LB:{fun.convertCheck(teamli2, 'lb')}\n"
-                                                   f"CB:{fun.convertCheck(teamli2, 'cb')}\n"
-                                                   f"RB:{fun.convertCheck(teamli2, 'rb')}\n"
-                                                   f"GK:{fun.convertCheck(teamli2, 'gk')}\n", inline=True)
-        embed.add_field(name="3경기 출석결과", value=f"ST:{fun.convertCheck(teamli3, 'st')}\n"
-                                                   f"LW:{fun.convertCheck(teamli3, 'lw')}\n"
-                                                   f"RW:{fun.convertCheck(teamli3, 'rw')}\n"
-                                                   f"CAM:{fun.convertCheck(teamli3, 'cam')}\n"
-                                                   f"CM:{fun.convertCheck(teamli3, 'cm')}\n"
-                                                   f"CDM:{fun.convertCheck(teamli3, 'cdm')}\n"
-                                                   f"LB:{fun.convertCheck(teamli3, 'lb')}\n"
-                                                   f"CB:{fun.convertCheck(teamli3, 'cb')}\n"
-                                                   f"RB:{fun.convertCheck(teamli3, 'rb')}\n"
-                                                   f"GK:{fun.convertCheck(teamli3, 'gk')}\n", inline=True)
-        embed.add_field(name="4경기 출석결과", value=f"ST:{fun.convertCheck(teamli4, 'st')}\n"
-                                                   f"LW:{fun.convertCheck(teamli4, 'lw')}\n"
-                                                   f"RW:{fun.convertCheck(teamli4, 'rw')}\n"
-                                                   f"CAM:{fun.convertCheck(teamli4, 'cam')}\n"
-                                                   f"CM:{fun.convertCheck(teamli4, 'cm')}\n"
-                                                   f"CDM:{fun.convertCheck(teamli4, 'cdm')}\n"
-                                                   f"LB:{fun.convertCheck(teamli4, 'lb')}\n"
-                                                   f"CB:{fun.convertCheck(teamli4, 'cb')}\n"
-                                                   f"RB:{fun.convertCheck(teamli4, 'rb')}\n"
-                                                   f"GK:{fun.convertCheck(teamli4, 'gk')}\n", inline=True)
+        embed.add_field(name=f"1경기 출석결과({fun.countCheck(teamli1)} 명)",
+                        value=f"ST:{fun.convertCheck(teamli1, 'st')}\n"
+                              f"LW:{fun.convertCheck(teamli1, 'lw')}\n"
+                              f"RW:{fun.convertCheck(teamli1, 'rw')}\n"
+                              f"CAM:{fun.convertCheck(teamli1, 'cam')}\n"
+                              f"CM:{fun.convertCheck(teamli1, 'cm')}\n"
+                              f"CDM:{fun.convertCheck(teamli1, 'cdm')}\n"
+                              f"LB:{fun.convertCheck(teamli1, 'lb')}\n"
+                              f"CB:{fun.convertCheck(teamli1, 'cb')}\n"
+                              f"RB:{fun.convertCheck(teamli1, 'rb')}\n"
+                              f"GK:{fun.convertCheck(teamli1, 'gk')}\n", inline=True)
+        embed.add_field(name=f"2경기 출석결과({fun.countCheck(teamli2)} 명)",
+                        value=f"ST:{fun.convertCheck(teamli1, 'st')}\n"
+                              f"LW:{fun.convertCheck(teamli2, 'lw')}\n"
+                              f"RW:{fun.convertCheck(teamli2, 'rw')}\n"
+                              f"CAM:{fun.convertCheck(teamli2, 'cam')}\n"
+                              f"CM:{fun.convertCheck(teamli2, 'cm')}\n"
+                              f"CDM:{fun.convertCheck(teamli2, 'cdm')}\n"
+                              f"LB:{fun.convertCheck(teamli2, 'lb')}\n"
+                              f"CB:{fun.convertCheck(teamli2, 'cb')}\n"
+                              f"RB:{fun.convertCheck(teamli2, 'rb')}\n"
+                              f"GK:{fun.convertCheck(teamli2, 'gk')}\n", inline=True)
+        embed.add_field(name=f"3경기 출석결과({fun.countCheck(teamli3)} 명)",
+                        value=f"ST:{fun.convertCheck(teamli3, 'st')}\n"
+                              f"LW:{fun.convertCheck(teamli3, 'lw')}\n"
+                              f"RW:{fun.convertCheck(teamli3, 'rw')}\n"
+                              f"CAM:{fun.convertCheck(teamli3, 'cam')}\n"
+                              f"CM:{fun.convertCheck(teamli3, 'cm')}\n"
+                              f"CDM:{fun.convertCheck(teamli3, 'cdm')}\n"
+                              f"LB:{fun.convertCheck(teamli3, 'lb')}\n"
+                              f"CB:{fun.convertCheck(teamli3, 'cb')}\n"
+                              f"RB:{fun.convertCheck(teamli3, 'rb')}\n"
+                              f"GK:{fun.convertCheck(teamli3, 'gk')}\n", inline=True)
+        embed.add_field(name=f"4경기 출석결과({fun.countCheck(teamli1)} 명)",
+                        value=f"ST:{fun.convertCheck(teamli4, 'st')}\n"
+                              f"LW:{fun.convertCheck(teamli4, 'lw')}\n"
+                              f"RW:{fun.convertCheck(teamli4, 'rw')}\n"
+                              f"CAM:{fun.convertCheck(teamli4, 'cam')}\n"
+                              f"CM:{fun.convertCheck(teamli4, 'cm')}\n"
+                              f"CDM:{fun.convertCheck(teamli4, 'cdm')}\n"
+                              f"LB:{fun.convertCheck(teamli4, 'lb')}\n"
+                              f"CB:{fun.convertCheck(teamli4, 'cb')}\n"
+                              f"RB:{fun.convertCheck(teamli4, 'rb')}\n"
+                              f"GK:{fun.convertCheck(teamli4, 'gk')}\n", inline=True)
         embed.set_footer(text="Copyright ⓒ 2020-2021 타임제이(TimeJ) in C.E.F All Right Reserved.")
         await ctx.send(embed=embed)
     else:
@@ -1861,16 +1856,11 @@ async def 출석결과(ctx, teamname):
 @bot.command()
 async def 출석초기화(ctx):
     role_names = [role.name for role in ctx.author.roles]
-    a_check_channel_id = get(ctx.guild.channels, name='team-a-출석조사')
-    b_check_channel_id = get(ctx.guild.channels, name='team-b-출석조사')
-    c_check_channel_id = get(ctx.guild.channels, name='team-c-출석조사')
-    d_check_channel_id = get(ctx.guild.channels, name='team-d-출석조사')
-    e_check_channel_id = get(ctx.guild.channels, name='team-e-출석조사')
-    A_check_channel = bot.get_channel(a_check_channel_id)
-    B_check_channel = bot.get_channel(b_check_channel_id)
-    C_check_channel = bot.get_channel(c_check_channel_id)
-    D_check_channel = bot.get_channel(d_check_channel_id)
-    E_check_channel = bot.get_channel(d_check_channel_id)
+    A_check_channel = get(ctx.guild.channels, name='team-a-출석조사')
+    B_check_channel = get(ctx.guild.channels, name='team-b-출석조사')
+    C_check_channel = get(ctx.guild.channels, name='team-c-출석조사')
+    D_check_channel = get(ctx.guild.channels, name='team-d-출석조사')
+    E_check_channel = get(ctx.guild.channels, name='team-e-출석조사')
     if '스태프' in role_names:
         # 범위(체크)
         a_max = str(int(worksheet_check_A.acell('A1').value) + 1)
@@ -1964,28 +1954,23 @@ async def 종료공지(ctx):
     c_team_chat_id = get(ctx.guild.channels, name='team-c-팀채팅')
     d_team_chat_id = get(ctx.guild.channels, name='team-d-팀채팅')
     e_team_chat_id = get(ctx.guild.channels, name='team-e-팀채팅')
-    a_check_channel = bot.get_channel(a_team_chat_id)
-    b_check_channel = bot.get_channel(b_team_chat_id)
-    c_check_channel = bot.get_channel(c_team_chat_id)
-    d_check_channel = bot.get_channel(d_team_chat_id)
-    e_check_channel = bot.get_channel(d_team_chat_id)
     emoji = "<:__:708304488217313371>"
     for i in range(0, 10):
         emojis = emojis + emoji
-    await a_check_channel.send(content=f"{emojis}\n")
-    await a_check_channel.send("```리그 종료 시간 23시 40분 입니다.```")
+    await a_team_chat_id.send(content=f"{emojis}\n")
+    await a_team_chat_id.send("```리그 종료 시간 23시 40분 입니다.```")
 
-    await b_check_channel.send(content=f"{emojis}\n")
-    await b_check_channel.send("```리그 종료 시간 23시 40분 입니다.```")
+    await b_team_chat_id.send(content=f"{emojis}\n")
+    await b_team_chat_id.send("```리그 종료 시간 23시 40분 입니다.```")
 
-    await c_check_channel.send(content=f"{emojis}\n")
-    await c_check_channel.send("```리그 종료 시간 23시 40분  입니다.```")
+    await c_team_chat_id.send(content=f"{emojis}\n")
+    await c_team_chat_id.send("```리그 종료 시간 23시 40분  입니다.```")
 
-    await d_check_channel.send(content=f"{emojis}\n")
-    await d_check_channel.send("```리그 종료 시간 23시 40분 입니다.```")
+    await d_team_chat_id.send(content=f"{emojis}\n")
+    await d_team_chat_id.send("```리그 종료 시간 23시 40분 입니다.```")
 
-    await e_check_channel.send(content=f"{emojis}\n")
-    await e_check_channel.send("```리그 종료 시간 23시 40분 입니다.```")
+    await e_team_chat_id.send(content=f"{emojis}\n")
+    await e_team_chat_id.send("```리그 종료 시간 23시 40분 입니다.```")
 
 
 @bot.command()

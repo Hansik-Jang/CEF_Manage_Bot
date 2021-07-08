@@ -7,6 +7,8 @@ def teamNameConvert(name):
         return 'TEAM_C'
     elif name == "D" or name == 'd' or name == 'TEAM_D':
         return 'TEAM_D'
+    elif name == "E" or name == 'e' or name == 'TEAM_E':
+        return 'TEAM_E'
     else:
         return 'error'
 
@@ -28,9 +30,10 @@ def convertJupo(name):
         return jupo
 
 def convertBupo(name):
-    a = name.split['/']
+    a = name.split('/')
     temp = a[1]
-    bupo = temp.replace(']', '')
+    b = temp.split(']')
+    bupo = b[0]
     return bupo
 
 def caculateUnit(money):
@@ -69,8 +72,16 @@ def convertCheck(teamlist, pos):
     for player in teamlist:
         if player[2] == '체크':
             if player[0] == pos2:
-                text = text + player[1] + " "
+                text = text + player[1] + ", "
     return text
+
+def countCheck(teamlist):
+    count = 0
+    for player in teamlist:
+        if player[2] == '체크':
+               count += 1
+    return count
+
 
 def getteamlist(teamlist):
     text = ""
