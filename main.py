@@ -960,9 +960,6 @@ async def 커리어(ctx, text, member: discord.Member):
                     before = worksheet_career.acell('F' + str(check)).value
                     now = int(before) + 1
                     worksheet_career.update_acell('F' + str(check), str(now))
-                    before_price = worksheet_career.acell('F' + str(check)).value
-                    now_price = before_price * 120 / 100
-
                     key = 1
                     await ctx.send(content=f"```cs\n"
                                            f"{name[0]}님의 선수 커리어가 정상적으로 업데이트되었습니다.\n"
