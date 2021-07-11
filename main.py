@@ -27,7 +27,7 @@ worksheet_check_B = sh.worksheet('출첵B')
 worksheet_check_C = sh.worksheet('출첵C')
 worksheet_check_D = sh.worksheet('출첵D')
 worksheet_check_E = sh.worksheet('출첵E')
-
+worksheet_game = sh.worksheet('게임')
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="%", intents=intents)
@@ -69,10 +69,89 @@ async def test(ctx):
 
 @bot.command()
 async def 테(ctx, price):
-    price = int(price) * 100000000
-    addWallet = price * 0.00001
-    await ctx.send(content=f"이적료 : {fun.caculateUnit(price)}\n"
-                           f"개인자산 : {fun.caculateUnit(addWallet)}")
+    cell_max = worksheet_game.acell('A1').value
+    ol_max = str(int(cell_max) + 1)
+    ol_range = worksheet_game.range("D2:D" + ol_max)
+    li = []
+    for cell in ol_range:
+        print(cell.value)
+        li.append(cell.value)
+    print(ol_range)
+    print(li)
+    if fun.convertNickname(ctx.author.display_name) in li:
+        print('a')
+    else:
+        print('b')
+
+@bot.command()
+async def 토토배팅(ctx, result, price):
+    await ctx.message.delete()
+    BAT_MAX = 100000
+    if str(ctx.message.channel) == '유로-토토💰':
+        cell_max = worksheet_game.acell('A1').value
+        now = datetime.datetime.now()
+        now_time = now.strftime('%Y-%m-%d %H:%M:%S')
+        result_li = ['잉글랜드', '무', '이탈리아']
+        if result in result_li and int(price) <= BAT_MAX:      # 승, 무, 패 맞게 입력하고, 베팅 금액이 100만원 이하일 때
+            # 중복여부 체크
+            ol_max = str(int(cell_max) + 1)
+            ol_range = worksheet_game.range("D2:D" + ol_max)
+            li = []
+            for cell in ol_range:
+                li.append(cell.value)
+            if fun.convertNickname(ctx.author.display_name) not in li:  # 중복 검사
+                # 토토 역할 넣기
+                user = ctx.author
+                if result == '잉글랜드':
+                    role = get(ctx.guild.roles, name='토토-잉글랜드')
+                    await user.add_roles(role)
+                elif result == '이탈리아':
+                    role = get(ctx.guild.roles, name='토토-이탈리아')
+                    await user.add_roles(role)
+                # 게임 시트 토토 영역에 추가
+                worksheet_game.insert_row(
+                    ["", now_time, str(ctx.author.id), fun.convertNickname(ctx.author.display_name), result, str(price)],
+                    int(cell_max) + 2)
+                # 사용한 비용만큼 개인자산 차감
+                cell_max = worksheet_career.acell('A1').value        # 범위 내 셀 값 로딩
+                range_list = worksheet_career.range('E2:E' + cell_max)        # 내 자산 차감
+                for i, cell in enumerate(range_list):
+                    if str(cell.value) == str(fun.convertNickname(ctx.author.display_name)):
+                        check = i + 2
+                        presentMoney = int(worksheet_career.acell('R' + str(check)).value)
+                        if int(presentMoney) >= int(price):   # 갖고 있는 자산이 베팅 금액이 높을때만
+                            presentMoney = presentMoney - int(price)
+                            worksheet_career.update_acell('R' + str(check), str(presentMoney))
+                await ctx.send(content=f"{ctx.author.mention} -> {result} 팀 {fun.caculateUnit(price)} 배팅")
+            else:
+                cell_max = worksheet_game.acell('A1').value        # 범위 내 셀 값 로딩
+                range_list = worksheet_game.range('D2:D' + str(int(cell_max)+1))        # 내 자산 차감
+                for i, cell in enumerate(range_list):
+                    if str(cell.value) == str(fun.convertNickname(ctx.author.display_name)):
+                        check = i + 2
+                        break
+                team = worksheet_game.acell('E' + str(check)).value
+                bat = worksheet_game.acell('F' + str(check)).value
+                await ctx.send(content=f'```이미 참여하였습니다.\n'
+                                       f'선택한 팀 : {team}, 배팅 금액 : {fun.caculateUnit(bat)}```')
+        elif result not in result_li:
+            await ctx.send("```오타 확인해주세요.\n"
+                           "'잉글랜드' 혹은 '이탈리아'만 입력 가능합니다.```")
+        elif int(price) > BAT_MAX:
+            await ctx.send(content=f"```{BAT_MAX} 이하만 입력 가능합니다.```")
+    else:
+        await ctx.send('```유로-토토💰 채널에서만 사용 가능합니다.```')
+
+
+@bot.command()
+async def 토토결과(ctx):
+    ownRoles = [role.name for role in ctx.author.roles]
+    if '스태프' in ownRoles:
+        print('a')
+        await ctx.send(content=f"")
+    else:
+        await ctx.send("```스태프만 사용 가능한 명령어입니다.```")
+
 
 
 @bot.command()
@@ -90,7 +169,7 @@ async def 송금(ctx, member: discord.Member, send):
         for i, cell in enumerate(range_list):
             if str(cell.value) == str(fun.convertNickname(ctx.author.display_name)):
                 check = i + 2
-                mymoney = int(worksheet_career.acell('R' + str(check)).value.replace(',', ''))
+                mymoney = int(worksheet_career.acell('R' + str(check)).value)
                 if int(mymoney) >= int(send):        # 갖고 있는 자산이 송금 금액보다 높을때만
                     myaftermoney = int(mymoney) - send
                     print('myaftermoney:', myaftermoney)
@@ -99,7 +178,7 @@ async def 송금(ctx, member: discord.Member, send):
                     for j, cell2 in enumerate(range_list):
                         if str(cell2.value) == str(fun.convertNickname(member.display_name)):
                             check2 = j + 2
-                            mem_money = int(worksheet_career.acell('R' + str(check2)).value.replace(',', ''))
+                            mem_money = int(worksheet_career.acell('R' + str(check2)).value)
                             print('mem_money:', mem_money)
                             mem_aftermoney = int(mem_money) + send
                             print('mem_aftermoney:', mem_aftermoney)
@@ -281,7 +360,7 @@ async def 가이드(ctx, text):
 
     await ctx.send(embed=embed)
 
-
+'''
 @bot.command()
 async def 가입안내(ctx):
     role_names = [role.name for role in ctx.author.roles]
@@ -313,7 +392,7 @@ async def 가입안내(ctx):
         await ctx.send("```정답을 다 입력하셨으면 cef-가입신청 에서 '%가입' 명령어와 \n"
                        "함께 카페에 작성한 선수 등록글의 링크를 첨부하여 입력해주세요.```")
     else:
-        await ctx.send("```해당 명령어는 스태프만 사용 가능합니다.```")
+        await ctx.send("```해당 명령어는 스태프만 사용 가능합니다.```")'''
 
 
 @bot.command()
@@ -381,7 +460,7 @@ async def 가입(ctx):
                         ["", now_time, display_name, id_num, nickname, jupo, bupo, '무소속',
                          '0000-00-00 00:00:00'], int(cell_max) + 1)
                     worksheet_career.insert_row(
-                        ["", now_time, display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0], int(cell_max) + 1)
+                        ["", now_time, display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0], int(cell_max) + 1)
 
                     await ctx.send(content=f"```{ctx.author.display_name}님 정상 등록되었습니다.```")
                     await user.add_roles(cefRole)
@@ -398,7 +477,7 @@ async def 가입(ctx):
                         ["", now_time, display_name, id_num, nickname, jupo, '', '무소속',
                          '0000-00-00 00:00:00'], int(cell_max) + 1)
                     worksheet_career.insert_row(
-                        ["", now_time, display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0], int(cell_max) + 1)
+                        ["", now_time, display_name, id_num, nickname, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0], int(cell_max) + 1)
                     await ctx.send(content=f"```{ctx.author.display_name}님 정상 등록되었습니다.```")
                     await user.add_roles(cefRole)
                     await user.add_roles(newRole)
@@ -853,11 +932,13 @@ async def 역할부여(ctx, team_name, member: discord.Member, position, price):
                 key = 1
                 break
         if teamname_error == 1 & key == 1 & position_error == 1:
-            beforeWallet = worksheet_career.acell('R' + str(list_pos + 2)).value
-            print(beforeWallet, addWallet)
-            wallet = int(beforeWallet) + int(addWallet)
+            beforePresentWallet = worksheet_career.acell('R' + str(list_pos + 2)).value
+            beforeTotalWallet = worksheet_career.acell('S' + str(list_pos + 2)).value
+            print(beforePresentWallet, addWallet)
+            presentWallet = int(beforePresentWallet) + int(addWallet)
+            TotalWallet = int(beforeTotalWallet) + int(addWallet)
             worksheet_career.update_acell('Q' + str(list_pos + 2), str(price))
-            worksheet_career.update_acell('R' + str(list_pos + 2), str(wallet))
+            worksheet_career.update_acell('R' + str(list_pos + 2), str(TotalWallet))
             worksheet_list.update_acell('H' + str(list_pos + 2), team_name)
             await member.add_roles(role)
             await ctx.send(content=f"<소속 변경>\n"
@@ -865,7 +946,7 @@ async def 역할부여(ctx, team_name, member: discord.Member, position, price):
                                    f"이적료는 {price} 억원이며, 개인자산으로 {fun.caculateUnit(addWallet)} 지급되었습니다.")
 
             if fun.teamNameConvert(team_name) == "TEAM_A":
-                worksheet_check_A.insert_row(["", member.display_name, id_num, position, 0, 0, 0, 0], int(a_max) + 3)
+                worksheet_check_A.insert_row(["", member.display_name, id_num, position, 0, 0, 0, 0, 0], int(a_max) + 3)
             elif fun.teamNameConvert(team_name) == "TEAM_B":
                 worksheet_check_B.insert_row(["", member.display_name, id_num, position, 0, 0, 0, 0, 0], int(b_max) + 3)
             elif fun.teamNameConvert(team_name) == "TEAM_C":
@@ -1023,7 +1104,8 @@ async def 내정보(ctx):
             before_val = worksheet_career.acell('O' + str(check)).value
             naejeon = worksheet_career.acell('P' + str(check)).value
             price = worksheet_career.acell('Q' + str(check)).value
-            wallet = (worksheet_career.acell('R' + str(check)).value).replace(',', '')
+            presentWallet = worksheet_career.acell('R' + str(check)).value
+            totalWallet = worksheet_career.acell('S' + str(check)).value
 
     if key == 1:
         if "/" in ctx.author.display_name:
@@ -1036,7 +1118,8 @@ async def 내정보(ctx):
             embed = discord.Embed(title=f"내 정보", description=f"{ctx.author.display_name} 님의 정보창", color=0xFF007F)
             embed.set_thumbnail(url=ctx.author.avatar_url)
             embed.add_field(name="이적료", value=price + " 억원", inline=True)
-            embed.add_field(name="자산", value=fun.caculateUnit(wallet), inline=True)
+            embed.add_field(name="현재 자산", value=fun.caculateUnit(presentWallet), inline=True)
+            embed.add_field(name="누적 자산", value=fun.caculateUnit(totalWallet), inline=True)
             embed.add_field(name="소속팀", value=f"{team}", inline=True)
             embed.add_field(name="주포지션", value=jupo, inline=True)
             embed.add_field(name="부포지션", value=bupo, inline=True)
@@ -1063,7 +1146,8 @@ async def 내정보(ctx):
             embed = discord.Embed(title=f"내 정보", description=f"{ctx.author.display_name} 님의 정보창", color=0xFF007F)
             embed.set_thumbnail(url=ctx.author.avatar_url)
             embed.add_field(name="이적료", value=price + " 억원", inline=True)
-            embed.add_field(name="자산", value=fun.caculateUnit(wallet), inline=True)
+            embed.add_field(name="현재 자산", value=fun.caculateUnit(presentWallet), inline=True)
+            embed.add_field(name="누적 자산", value=fun.caculateUnit(totalWallet), inline=True)
             embed.add_field(name="소속팀", value=f"{team}", inline=True)
             embed.add_field(name="주포지션", value=jupo, inline=True)
             embed.add_field(name="부포지션", value=bupo, inline=True)
