@@ -88,30 +88,18 @@ async def 토토배팅(ctx, result, price):
     await ctx.message.delete()
     BAT_MAX = 100000
     if str(ctx.message.channel) == '유로-토토💰':
-        cell_max = worksheet_game.acell('A1').value
+        game_max = worksheet_game.acell('A1').value
         now = datetime.datetime.now()
         now_time = now.strftime('%Y-%m-%d %H:%M:%S')
         result_li = ['잉글랜드', '무', '이탈리아']
         if result in result_li and int(price) <= BAT_MAX:      # 승, 무, 패 맞게 입력하고, 베팅 금액이 100만원 이하일 때
             # 중복여부 체크
-            ol_max = str(int(cell_max) + 1)
+            ol_max = str(int(game_max) + 1)
             ol_range = worksheet_game.range("D2:D" + ol_max)
             li = []
             for cell in ol_range:
                 li.append(cell.value)
             if fun.convertNickname(ctx.author.display_name) not in li:  # 중복 검사
-                # 토토 역할 넣기
-                user = ctx.author
-                if result == '잉글랜드':
-                    role = get(ctx.guild.roles, name='토토-잉글랜드')
-                    await user.add_roles(role)
-                elif result == '이탈리아':
-                    role = get(ctx.guild.roles, name='토토-이탈리아')
-                    await user.add_roles(role)
-                # 게임 시트 토토 영역에 추가
-                worksheet_game.insert_row(
-                    ["", now_time, str(ctx.author.id), fun.convertNickname(ctx.author.display_name), result, str(price)],
-                    int(cell_max) + 2)
                 # 사용한 비용만큼 개인자산 차감
                 cell_max = worksheet_career.acell('A1').value        # 범위 내 셀 값 로딩
                 range_list = worksheet_career.range('E2:E' + cell_max)        # 내 자산 차감
@@ -122,7 +110,23 @@ async def 토토배팅(ctx, result, price):
                         if int(presentMoney) >= int(price):   # 갖고 있는 자산이 베팅 금액이 높을때만
                             presentMoney = presentMoney - int(price)
                             worksheet_career.update_acell('R' + str(check), str(presentMoney))
-                await ctx.send(content=f"{ctx.author.mention} -> {result} 팀 {fun.caculateUnit(price)} 배팅")
+                            await ctx.send(content=f"{ctx.author.mention} -> {result} 팀 {fun.caculateUnit(price)} 배팅")
+                            # 토토 역할 넣기
+                            user = ctx.author
+                            if result == '잉글랜드' :
+                                role = get(ctx.guild.roles, name='토토-잉글랜드')
+                                await user.add_roles(role)
+                            elif result == '이탈리아' :
+                                role = get(ctx.guild.roles, name='토토-이탈리아')
+                                await user.add_roles(role)
+                            # 게임 시트 토토 영역에 추가
+                            worksheet_game.insert_row(
+                                ["", now_time, str(ctx.author.id), fun.convertNickname(ctx.author.display_name), result,
+                                 str(price)],
+                                int(game_max) + 2)
+                        else:
+                            await ctx.send(content=f"잔액이 부족합니다.")
+
             else:
                 cell_max = worksheet_game.acell('A1').value        # 범위 내 셀 값 로딩
                 range_list = worksheet_game.range('D2:D' + str(int(cell_max)+1))        # 내 자산 차감
@@ -144,13 +148,45 @@ async def 토토배팅(ctx, result, price):
 
 
 @bot.command()
-async def 토토결과(ctx):
-    ownRoles = [role.name for role in ctx.author.roles]
+async def 결(ctx):
+    name_list = worksheet_game.range('D3:D41')
+    choice_list = worksheet_game.range('E3:E41')
+    price_list = worksheet_game.range('F3:F41')
+    a = []
+    b = []
+
+    for i, cell in enumerate(choice_list):
+        if str(cell.value) == '이탈리아':
+            aname = name_list[i].value
+            aprice = price_list[i].value
+            result = int(int(aprice) * 23 / 10)
+            a.append([aname, aprice, result])
+        else:
+            bname = name_list[i].value
+            bprice = price_list[i].value
+            result = int(int(bprice) * 204 / 100)
+            b.append([bname, bprice, result])
+
+    print(a)
+    print(b)
+    text1 = ''
+    text2 = ''
+    for i in range(len(a)):
+        text1 = text1 + a[i][0] + "(" + a[i][1] + " -> " + str(a[i][2]) + ")\n"
+    for i in range(len(b)):
+        text2 = text2 + b[i][0] + "(" + b[i][1] + " -> 0)\n"
+    print(text1)
+    print(text2)
+    embed = discord.Embed(title="유로2020 결승전 토토 베팅 결과", description="", color=0x62c1cc)
+    embed.add_field(name="이탈리아 (승) (x2.30)", value=text1, inline=False)
+    embed.add_field(name="잉글랜드 (x2.04)", value=text2, inline=False)
+    await ctx.send(embed=embed)
+    '''ownRoles = [role.name for role in ctx.author.roles]
     if '스태프' in ownRoles:
         print('a')
         await ctx.send(content=f"")
     else:
-        await ctx.send("```스태프만 사용 가능한 명령어입니다.```")
+        await ctx.send("```스태프만 사용 가능한 명령어입니다.```")'''
 
 
 
@@ -1409,7 +1445,7 @@ async def 출석(ctx, game):
                                 count = worksheet_check_B.acell('I' + str(temp)).value
                                 count = int(count) + 1
                                 worksheet_check_B.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"정상적으로 출석참가 되었습니다.```")
                     elif game == '2' :
@@ -1424,7 +1460,7 @@ async def 출석(ctx, game):
                                 count = worksheet_check_B.acell('I' + str(temp)).value
                                 count = int(count) + 1
                                 worksheet_check_B.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"정상적으로 출석참가 되었습니다.```")
                     elif game == '3' :
@@ -1439,7 +1475,7 @@ async def 출석(ctx, game):
                                 count = worksheet_check_B.acell('I' + str(temp)).value
                                 count = int(count) + 1
                                 worksheet_check_B.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"정상적으로 출석참가 되었습니다.```")
                     elif game == '4' :
@@ -1454,7 +1490,7 @@ async def 출석(ctx, game):
                                 count = worksheet_check_B.acell('I' + str(temp)).value
                                 count = int(count) + 1
                                 worksheet_check_B.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"정상적으로 출석참가 되었습니다.```")
                     else :
@@ -1482,7 +1518,7 @@ async def 출석(ctx, game):
                                 count = worksheet_check_C.acell('I' + str(temp)).value
                                 count = int(count) + 1
                                 worksheet_check_C.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"정상적으로 출석참가 되었습니다.```")
                     elif game == '2':
@@ -1497,7 +1533,7 @@ async def 출석(ctx, game):
                                 count = worksheet_check_C.acell('I' + str(temp)).value
                                 count = int(count) + 1
                                 worksheet_check_C.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"정상적으로 출석참가 되었습니다.```")
                     elif game == '3':
@@ -1512,7 +1548,7 @@ async def 출석(ctx, game):
                                 count = worksheet_check_C.acell('I' + str(temp)).value
                                 count = int(count) + 1
                                 worksheet_check_C.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"정상적으로 출석참가 되었습니다.```")
                     elif game == '4':
@@ -1527,7 +1563,7 @@ async def 출석(ctx, game):
                                 count = worksheet_check_C.acell('I' + str(temp)).value
                                 count = int(count) + 1
                                 worksheet_check_C.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"정상적으로 출석참가 되었습니다.```")
                     else:
@@ -1555,7 +1591,7 @@ async def 출석(ctx, game):
                                 count = worksheet_check_D.acell('I' + str(temp)).value
                                 count = int(count) + 1
                                 worksheet_check_D.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"정상적으로 출석참가 되었습니다.```")
                     elif game == '2' :
@@ -1570,7 +1606,7 @@ async def 출석(ctx, game):
                                 count = worksheet_check_D.acell('I' + str(temp)).value
                                 count = int(count) + 1
                                 worksheet_check_D.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"정상적으로 출석참가 되었습니다.```")
                     elif game == '3' :
@@ -1585,7 +1621,7 @@ async def 출석(ctx, game):
                                 count = worksheet_check_D.acell('I' + str(temp)).value
                                 count = int(count) + 1
                                 worksheet_check_D.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"정상적으로 출석참가 되었습니다.```")
                     elif game == '4' :
@@ -1600,7 +1636,7 @@ async def 출석(ctx, game):
                                 count = worksheet_check_D.acell('I' + str(temp)).value
                                 count = int(count) + 1
                                 worksheet_check_D.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"정상적으로 출석참가 되었습니다.```")
                     else:
@@ -1776,7 +1812,7 @@ async def 출석취소(ctx, game):
                                 count = worksheet_check_B.acell('I' + str(temp)).value
                                 count = int(count) - 1
                                 worksheet_check_B.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"출석취소 되었습니다.```")
                     elif game == '2' :
@@ -1791,7 +1827,7 @@ async def 출석취소(ctx, game):
                                 count = worksheet_check_B.acell('I' + str(temp)).value
                                 count = int(count) - 1
                                 worksheet_check_B.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"출석취소 되었습니다.```")
                     elif game == '3' :
@@ -1806,7 +1842,7 @@ async def 출석취소(ctx, game):
                                 count = worksheet_check_B.acell('I' + str(temp)).value
                                 count = int(count) - 1
                                 worksheet_check_B.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"출석취소 되었습니다.```")
                     elif game == '4' :
@@ -1821,7 +1857,7 @@ async def 출석취소(ctx, game):
                                 count = worksheet_check_B.acell('I' + str(temp)).value
                                 count = int(count) - 1
                                 worksheet_check_B.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 B팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"출석취소 되었습니다.```")
                     else:
@@ -1846,7 +1882,7 @@ async def 출석취소(ctx, game):
                                 count = worksheet_check_C.acell('I' + str(temp)).value
                                 count = int(count) - 1
                                 worksheet_check_C.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"출석취소 되었습니다.```")
                         if time_2nd < time_now and time_now < time_after :
@@ -1860,7 +1896,7 @@ async def 출석취소(ctx, game):
                                 count = worksheet_check_C.acell('I' + str(temp)).value
                                 count = int(count) - 1
                                 worksheet_check_C.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"출석취소 되었습니다.```")
                     elif game == '3' :
@@ -1875,7 +1911,7 @@ async def 출석취소(ctx, game):
                                 count = worksheet_check_C.acell('I' + str(temp)).value
                                 count = int(count) - 1
                                 worksheet_check_C.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"출석취소 되었습니다.```")
                         if time_4th < time_now and time_now < time_after :
@@ -1889,7 +1925,7 @@ async def 출석취소(ctx, game):
                                 count = worksheet_check_C.acell('I' + str(temp)).value
                                 count = int(count) - 1
                                 worksheet_check_C.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 C팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"출석취소 되었습니다.```")
                     else:
@@ -1914,7 +1950,7 @@ async def 출석취소(ctx, game):
                                 count = worksheet_check_D.acell('I' + str(temp)).value
                                 count = int(count) - 1
                                 worksheet_check_D.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"출석취소 되었습니다.```")
                     elif game == '2' :
@@ -1929,7 +1965,7 @@ async def 출석취소(ctx, game):
                                 count = worksheet_check_D.acell('I' + str(temp)).value
                                 count = int(count) - 1
                                 worksheet_check_D.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"출석취소 되었습니다.```")
                     elif game == '3' :
@@ -1944,7 +1980,7 @@ async def 출석취소(ctx, game):
                                 count = worksheet_check_D.acell('I' + str(temp)).value
                                 count = int(count) - 1
                                 worksheet_check_D.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"출석취소 되었습니다.```")
                     elif game == '4' :
@@ -1959,7 +1995,7 @@ async def 출석취소(ctx, game):
                                 count = worksheet_check_D.acell('I' + str(temp)).value
                                 count = int(count) - 1
                                 worksheet_check_D.update_acell('I' + str(temp), str(count))
-                                await ctx.send(content=f"```{now_month}월 {now_day}일 A팀 {game}경기\n"
+                                await ctx.send(content=f"```{now_month}월 {now_day}일 D팀 {game}경기\n"
                                                        f"닉네임 : {ctx.author.display_name}\n"
                                                        f"출석취소 되었습니다.```")
                     else:
