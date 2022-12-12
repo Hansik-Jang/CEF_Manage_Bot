@@ -7,14 +7,14 @@ def teamNameConvert(name):
         return 'TEAM_C'
     elif name == "D" or name == 'd' or name == 'TEAM_D':
         return 'TEAM_D'
-    #elif name == "E" or name == 'e' or name == 'TEAM_E':
-        #return 'TEAM_E'
+    elif name == "E" or name == 'e' or name == 'TEAM_E':
+        return 'TEAM_E'
     else:
         return 'error'
 
 def convertNickname(name):
     temp = name.split('[')
-    nickname = temp[0]
+    nickname = temp[0].replace(' ', '')
     return nickname
 
 def convertJupo(name):
