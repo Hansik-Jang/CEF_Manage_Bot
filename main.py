@@ -4,15 +4,14 @@ import string
 import random
 import os
 import time
-import datetime
 import myfun
 from discord.ext import commands
 from discord.utils import get
-from PIL import Image, ImageDraw, ImageFont
-from oauth2client.service_account import ServiceAccountCredentials
+import datetime
 import googletrans
 import gspread
 import fun
+import sqlite3
 
 SWITCH_NICKNAME_CHANGE = True
 
@@ -59,21 +58,14 @@ async def on_ready():
     await bot.change_presence(status=discord.Status.online, activity=game)
 
 @bot.command()
-async def 번역(ctx, con, *, text):
+async def 번역(ctx,*, text):
     translator = googletrans.Translator()
     ru_result = translator.translate(text, dest='ru')
     en_result = translator.translate(text, dest='en')
     ja_result = translator.translate(text, dest='ja')
     id_result = translator.translate(text, dest='id')
-    if con == '러시아':
-        await ctx.send(content=f"```English : {en_result.text}```\n"
-                               f"```Русский : {ru_result.text}```")
-    elif con == '일본':
-        await ctx.send(content=f"```English : {en_result.text}```\n"
-                               f"```日本語 : {ja_result.text}```")
-    elif con == '인도네시아':
-        await ctx.send(content=f"'''English : {en_result.text}\n"
-                               f"ID : {id_result.text}")
+    await ctx.reply(content=f"번역 : {en_result.text}")
+    
 
 @bot.command(aliases=['tr'])
 async def trans(ctx, *, text):
@@ -81,22 +73,29 @@ async def trans(ctx, *, text):
     result = translator.translate(text, dest='ko')
     await ctx.send(content=f"```{result.text}```")
 
+
 @bot.command()
 async def 스위치(ctx, select):
+    MAX_COUNT = 20
     role_names = [role.name for role in ctx.author.roles]
     if '스태프' in role_names:
         if select == '닉변':
             global SWITCH_NICKNAME_CHANGE
             if SWITCH_NICKNAME_CHANGE:
                 SWITCH_NICKNAME_CHANGE = False
-                print(SWITCH_NICKNAME_CHANGE)
                 await ctx.send('```cs\n'
                                '정상 작동되어 닉네임 변경이 가능합니다.```')
-            else:
-                SWITCH_NICKNAME_CHANGE = True
-                print(SWITCH_NICKNAME_CHANGE)
-                await ctx.send('```cs\n'
-                               '정상 작동되어 닉네임 변경이 불가능합니다.```')
+                cd = await ctx.send("20초 후 자동으로 변경됩니다.")
+                for i in range(0, MAX_COUNT) :
+                    j = MAX_COUNT - i
+                    await cd.edit(content=f"{j}초 남았습니다.")
+                    time.sleep(1)
+                    if j == 1 :
+                        print(SWITCH_NICKNAME_CHANGE)
+                        SWITCH_NICKNAME_CHANGE = True
+                        print(SWITCH_NICKNAME_CHANGE)
+                        await cd.edit('```cs\n'
+                                       '제한 시간이 종료되었습니다.```')
     else:
         await ctx.send("스태프만 사용 가능한 명령어입니다.")
 
@@ -128,11 +127,13 @@ async def 내전채팅공지(ctx, *, text):
     a_team_chat_id = get(ctx.guild.text_channels, id=716649980374286386)
     b_team_chat_id = get(ctx.guild.text_channels, id=716650018664349706)
     c_team_chat_id = get(ctx.guild.text_channels, id=727532506932445354)
-    d_team_chat_id = get(ctx.guild.text_channels, id=727532609592229978)
-    e_team_chat_id = get(ctx.guild.text_channels, id=953639748709277736)
-    f_team_chat_id = get(ctx.guild.text_channels, id=987696347857694781)
+    d_team_chat_id = get(ctx.guild.text_channels, id=1052741347515322490)
+    e_team_chat_id = get(ctx.guild.text_channels, id=1053639929323868161)
+    f_team_chat_id = get(ctx.guild.text_channels, id=1052603649794252901)
+    g_team_chat_id = get(ctx.guild.text_channels, id=1084082346745135134)
+    h_team_chat_id = get(ctx.guild.text_channels, id=1084082460041682984)
 
-    channel_li = [a_team_chat_id, b_team_chat_id, c_team_chat_id, d_team_chat_id, e_team_chat_id, f_team_chat_id]
+    channel_li = [a_team_chat_id, b_team_chat_id, c_team_chat_id, d_team_chat_id, e_team_chat_id, f_team_chat_id, g_team_chat_id, h_team_chat_id]
 
     for channel in channel_li:
         await channel.send(content=f"{text}")
@@ -152,18 +153,21 @@ async def 내전순서공지(ctx):
     a_team_chat_id = get(ctx.guild.text_channels, id=716649980374286386)
     b_team_chat_id = get(ctx.guild.text_channels, id=716650018664349706)
     c_team_chat_id = get(ctx.guild.text_channels, id=727532506932445354)
-    d_team_chat_id = get(ctx.guild.text_channels, id=727532609592229978)
-    e_team_chat_id = get(ctx.guild.text_channels, id=994944525703315477)
-    f_team_chat_id = get(ctx.guild.text_channels, id=954721179237773343)
+    d_team_chat_id = get(ctx.guild.text_channels, id=1052741347515322490)
+    e_team_chat_id = get(ctx.guild.text_channels, id=1053639929323868161)
+    f_team_chat_id = get(ctx.guild.text_channels, id=1052603649794252901)
+    g_team_chat_id = get(ctx.guild.text_channels, id=1084082346745135134)
+    h_team_chat_id = get(ctx.guild.text_channels, id=1084082460041682984)
 
-    channel_li = [a_team_chat_id, b_team_chat_id, c_team_chat_id, d_team_chat_id, e_team_chat_id, f_team_chat_id]
+    channel_li = [a_team_chat_id, b_team_chat_id, c_team_chat_id, d_team_chat_id, e_team_chat_id, f_team_chat_id, g_team_chat_id, h_team_chat_id]
 
     #for channel in channel_li:
     #    await channel.send(content=f"{text}")
     try:
         await ctx.send("```현재 진행 중인 팀의 개수를 입력하세요.\n"
                        "1 - 4팀\n"
-                       "2 - 6팀```")
+                       "2 - 6팀\n"
+                       "3 - 8팀 (4+4)```")
         msg2 = await bot.wait_for("message", check=lambda m : m.author == ctx.author and m.channel == ctx.channel,
                                      timeout=10.0)
     except asyncio.TimeoutError :
@@ -199,6 +203,7 @@ async def 내전순서공지(ctx):
                     await b_team_chat_id.send("```현재 경기 순서\n3번째 경기 : A팀 vs D팀 // B팀 vs C팀```")
                     await c_team_chat_id.send("```현재 경기 순서\n3번째 경기 : A팀 vs D팀 // B팀 vs C팀```")
                     await d_team_chat_id.send("```현재 경기 순서\n3번째 경기 : A팀 vs D팀 // B팀 vs C팀```")
+
         elif msg2.content.lower() == '2':
             try:
                 await ctx.send("```숫자를 입력하세요.\n"
@@ -215,39 +220,94 @@ async def 내전순서공지(ctx):
             else:
                 if msg.content.lower() == '1':
                     await msg.delete()
-                    await a_team_chat_id.send("1번째 경기 : F vs A // B vs C // D vs E")
-                    await b_team_chat_id.send("1번째 경기 : F vs A // B vs C // D vs E")
-                    await c_team_chat_id.send("1번째 경기 : F vs A // B vs C // D vs E")
-                    await d_team_chat_id.send("1번째 경기 : F vs A // B vs C // D vs E")
-                    await e_team_chat_id.send("1번째 경기 : F vs A // B vs C // D vs E")
+                    await a_team_chat_id.send("```1번째 경기 : F vs A // B vs C // D vs E```")
+                    await b_team_chat_id.send("```1번째 경기 : F vs A // B vs C // D vs E```")
+                    await c_team_chat_id.send("```1번째 경기 : F vs A // B vs C // D vs E```")
+                    await d_team_chat_id.send("```1번째 경기 : F vs A // B vs C // D vs E```")
+                    await e_team_chat_id.send("```1번째 경기 : F vs A // B vs C // D vs E```")
+                    await f_team_chat_id.send("```1번째 경기 : F vs A // B vs C // D vs E```")
                 elif msg.content.lower() == '2':
                     await msg.delete()
-                    await a_team_chat_id.send("2번째 경기 : F vs B // A vs D // C vs E")
-                    await b_team_chat_id.send("2번째 경기 : F vs B // A vs D // C vs E")
-                    await c_team_chat_id.send("2번째 경기 : F vs B // A vs D // C vs E")
-                    await d_team_chat_id.send("2번째 경기 : F vs B // A vs D // C vs E")
-                    await e_team_chat_id.send("2번째 경기 : F vs B // A vs D // C vs E")
+                    await a_team_chat_id.send("```2번째 경기 : F vs B // A vs D // C vs E```")
+                    await b_team_chat_id.send("```2번째 경기 : F vs B // A vs D // C vs E```")
+                    await c_team_chat_id.send("```2번째 경기 : F vs B // A vs D // C vs E```")
+                    await d_team_chat_id.send("```2번째 경기 : F vs B // A vs D // C vs E```")
+                    await e_team_chat_id.send("```2번째 경기 : F vs B // A vs D // C vs E```")
+                    await f_team_chat_id.send("```2번째 경기 : F vs B // A vs D // C vs E```")
                 elif msg.content.lower() == '3':
                     await msg.delete()
-                    await a_team_chat_id.send("3번째 경기 : F vs C // A vs E // B vs D")
-                    await b_team_chat_id.send("3번째 경기 : F vs C // A vs E // B vs D")
-                    await c_team_chat_id.send("3번째 경기 : F vs C // A vs E // B vs D")
-                    await d_team_chat_id.send("3번째 경기 : F vs C // A vs E // B vs D")
-                    await e_team_chat_id.send("3번째 경기 : F vs C // A vs E // B vs D")
+                    await a_team_chat_id.send("```3번째 경기 : F vs C // A vs E // B vs D```")
+                    await b_team_chat_id.send("```3번째 경기 : F vs C // A vs E // B vs D```")
+                    await c_team_chat_id.send("```3번째 경기 : F vs C // A vs E // B vs D```")
+                    await d_team_chat_id.send("```3번째 경기 : F vs C // A vs E // B vs D```")
+                    await e_team_chat_id.send("```3번째 경기 : F vs C // A vs E // B vs D```")
+                    await f_team_chat_id.send("```3번째 경기 : F vs C // A vs E // B vs D```")
                 elif msg.content.lower() == '4':
                     await msg.delete()
-                    await a_team_chat_id.send("4번째 경기 : F vs D // A vs C // B vs E")
-                    await b_team_chat_id.send("4번째 경기 : F vs D // A vs C // B vs E")
-                    await c_team_chat_id.send("4번째 경기 : F vs D // A vs C // B vs E")
-                    await d_team_chat_id.send("4번째 경기 : F vs D // A vs C // B vs E")
-                    await e_team_chat_id.send("4번째 경기 : F vs D // A vs C // B vs E")
+                    await a_team_chat_id.send("```4번째 경기 : F vs D // A vs C // B vs E```")
+                    await b_team_chat_id.send("```4번째 경기 : F vs D // A vs C // B vs E```")
+                    await c_team_chat_id.send("```4번째 경기 : F vs D // A vs C // B vs E```")
+                    await d_team_chat_id.send("```4번째 경기 : F vs D // A vs C // B vs E```")
+                    await e_team_chat_id.send("```4번째 경기 : F vs D // A vs C // B vs E```")
+                    await f_team_chat_id.send("```4번째 경기 : F vs D // A vs C // B vs E```")
                 elif msg.content.lower() == '5':
                     await msg.delete()
-                    await a_team_chat_id.send("5번째 경기 : F vs E // A vs B // C vs D")
-                    await b_team_chat_id.send("5번째 경기 : F vs E // A vs B // C vs D")
-                    await c_team_chat_id.send("5번째 경기 : F vs E // A vs B // C vs D")
-                    await d_team_chat_id.send("5번째 경기 : F vs E // A vs B // C vs D")
-                    await e_team_chat_id.send("5번째 경기 : F vs E // A vs B // C vs D")
+                    await a_team_chat_id.send("```5번째 경기 : F vs E // A vs B // C vs D```")
+                    await b_team_chat_id.send("```5번째 경기 : F vs E // A vs B // C vs D```")
+                    await c_team_chat_id.send("```5번째 경기 : F vs E // A vs B // C vs D```")
+                    await d_team_chat_id.send("```5번째 경기 : F vs E // A vs B // C vs D```")
+                    await e_team_chat_id.send("```5번째 경기 : F vs E // A vs B // C vs D```")
+                    await f_team_chat_id.send("```5번째 경기 : F vs E // A vs B // C vs D```")
+
+        elif msg2.content.lower() == '3':
+            try :
+                await ctx.send("```숫자를 입력하세요.\n"
+                               "1 - 1번째 경기 : A vs B // C vs D // E vs F // G vs H\n"
+                               "2 - 2번째 경기 : A vs C // B vs D // E vs G // F vs H\n"
+                               "3 - 3번째 경기 : A vs D // B vs C // E vs H // F vs G\n```")
+                msg = await bot.wait_for("message",
+                                         check=lambda m : m.author == ctx.author and m.channel == ctx.channel,
+                                         timeout=10.0)
+            except asyncio.TimeoutError :
+                await ctx.channel.send("시간 초과")
+            else :
+                if msg.content.lower() == '1':
+                    await a_team_chat_id.send("```현재 경기 순서(그룹 A)\n1번째 경기 : A팀 vs B팀 // C팀 vs D팀```")
+                    await b_team_chat_id.send("```현재 경기 순서(그룹 A)\n1번째 경기 : A팀 vs B팀 // C팀 vs D팀```")
+                    await c_team_chat_id.send("```현재 경기 순서(그룹 A)\n1번째 경기 : A팀 vs B팀 // C팀 vs D팀```")
+                    await d_team_chat_id.send("```현재 경기 순서(그룹 A)\n1번째 경기 : A팀 vs B팀 // C팀 vs D팀```")
+
+                    await e_team_chat_id.send("```현재 경기 순서(그룹 B)\n1번째 경기 : E팀 vs F팀 // G팀 vs H팀```")
+                    await f_team_chat_id.send("```현재 경기 순서(그룹 B)\n1번째 경기 : E팀 vs F팀 // G팀 vs H팀```")
+                    await g_team_chat_id.send("```현재 경기 순서(그룹 B)\n1번째 경기 : E팀 vs F팀 // G팀 vs H팀```")
+                    await h_team_chat_id.send("```현재 경기 순서(그룹 B)\n1번째 경기 : E팀 vs F팀 // G팀 vs H팀```")
+
+                elif msg.content.lower() == '2':
+                    await msg.delete()
+                    await a_team_chat_id.send("```현재 경기 순서(그룹 A)\n2번째 경기 : A팀 vs C팀 // B팀 vs D팀```")
+                    await b_team_chat_id.send("```현재 경기 순서(그룹 A)\n2번째 경기 : A팀 vs C팀 // B팀 vs D팀```")
+                    await c_team_chat_id.send("```현재 경기 순서(그룹 A)\n2번째 경기 : A팀 vs C팀 // B팀 vs D팀```")
+                    await d_team_chat_id.send("```현재 경기 순서(그룹 A)\n2번째 경기 : A팀 vs C팀 // B팀 vs D팀```")
+
+                    await e_team_chat_id.send("```현재 경기 순서(그룹 B)\n2번째 경기 : E팀 vs G팀 // F팀 vs H팀```")
+                    await f_team_chat_id.send("```현재 경기 순서(그룹 B)\n2번째 경기 : E팀 vs G팀 // F팀 vs H팀```")
+                    await g_team_chat_id.send("```현재 경기 순서(그룹 B)\n2번째 경기 : E팀 vs G팀 // F팀 vs H팀```")
+                    await h_team_chat_id.send("```현재 경기 순서(그룹 B)\n2번째 경기 : E팀 vs G팀 // F팀 vs H팀```")
+                elif msg.content.lower() == '3':
+                    await msg.delete()
+                    await a_team_chat_id.send("```현재 경기 순서(그룹 A)\n3번째 경기 : A팀 vs D팀 // B팀 vs C팀```")
+                    await b_team_chat_id.send("```현재 경기 순서(그룹 A)\n3번째 경기 : A팀 vs D팀 // B팀 vs C팀```")
+                    await c_team_chat_id.send("```현재 경기 순서(그룹 A)\n3번째 경기 : A팀 vs D팀 // B팀 vs C팀```")
+                    await d_team_chat_id.send("```현재 경기 순서(그룹 A)\n3번째 경기 : A팀 vs D팀 // B팀 vs C팀```")
+
+                    await e_team_chat_id.send("```현재 경기 순서(그룹 B)\n3번째 경기 : E팀 vs H팀 // F팀 vs G팀```")
+                    await f_team_chat_id.send("```현재 경기 순서(그룹 B)\n3번째 경기 : E팀 vs H팀 // F팀 vs G팀```")
+                    await g_team_chat_id.send("```현재 경기 순서(그룹 B)\n3번째 경기 : E팀 vs H팀 // F팀 vs G팀```")
+                    await h_team_chat_id.send("```현재 경기 순서(그룹 B)\n3번째 경기 : E팀 vs H팀 // F팀 vs G팀```")
+
+
+
+
 
 
 @bot.command()
@@ -876,6 +936,8 @@ async def 가입(ctx):
     newRole = get(ctx.guild.roles, name='신규')
     channel = get(ctx.guild.channels, name='가입-탈퇴-명단')
     role_names = [role.name for role in ctx.author.roles]
+    team_channel = get(ctx.guild.channels, id=1048944605493743677)
+    player_channel = get(ctx.guild.channels, id=969159455956684801)
     # 닉네임 양식 체크, 분리 및 시트 등록
     #  - 신규 가입 & 닉네임 중복 아닐 경우
     if 'CEF' not in role_names:
@@ -910,9 +972,20 @@ async def 가입(ctx):
                     await user.add_roles(cefRole)
                     await user.add_roles(newRole)
                     await user.edit(nick=display_name)
-                    await ctx.reply("```가입을 환영합니다!```\n"
-                                   "https://cafe.naver.com/cyberearlyfootballc/18267\n"
-                                "필독하셔서 게임 진행이나 서버 이용에 차질 없도록 부탁드리겠습니다.")
+
+                    await ctx.reply(content=f"```가입을 환영합니다!\n"
+                                            "필독하셔서 게임 진행이나 서버 이용에 차질 없도록 부탁드리겠습니다.```\n"
+                                            "https://cafe.naver.com/cyberearlyfootballc/18267\n"
+                                            "저희 C.E.F는 토요일을 제외한 매 저녁 9시부터 11시 30분까지 각 팀에 소속되어 게임하게 됩니다.\n"
+                                            f"팀을 구하실 때는 아무런 채널에 '%FA역할부여' 명령어를 사용한 후\n"
+                                            f"'팀-홍보' 채널 혹은 '선수-홍보' 채널을 이용하시기 바랍니다.")
+
+                    '''await ctx.reply(content=f"```가입을 환영합니다!\n"
+                                            "필독하셔서 게임 진행이나 서버 이용에 차질 없도록 부탁드리겠습니다.```\n"
+                                            "https://cafe.naver.com/cyberearlyfootballc/18267\n"
+                                            "저희 C.E.F는 토요일을 제외한 매 저녁 9시부터 11시 30분까지 각 팀에 소속되어 게임하게 됩니다.\n"
+                                            f"팀을 구하실 때는 아무런 채널에 '%FA역할부여' 명령어를 사용한 후\n"
+                                            f"{team_channel.mention} 채널 혹은 {player_channel.mention} 채널을 이용하시기 바랍니다.")'''
                     await channel.send(content=f"<신규가입> {ctx.author.mention} (가입일자 : {now_time})")
 
                 else:
@@ -928,7 +1001,18 @@ async def 가입(ctx):
                     await user.add_roles(cefRole)
                     await user.add_roles(newRole)
                     await user.edit(nick=display_name)
-                    await ctx.reply("```가입을 환영합니다!```")
+                    await ctx.reply(content=f"```가입을 환영합니다!\n"
+                                            "필독하셔서 게임 진행이나 서버 이용에 차질 없도록 부탁드리겠습니다.\n```"
+                                            "https://cafe.naver.com/cyberearlyfootballc/18267\n"
+                                            "저희 C.E.F는 토요일을 제외한 매 저녁 9시부터 11시 30분까지 각 팀에 소속되어 게임하게 됩니다.\n"
+                                            f"팀을 구하실 때는 아무런 채널에 '%FA역할부여' 명령어를 사용한 후\n"
+                                            f"'팀-홍보' 채널 혹은 '선수-홍보' 채널을 이용하시기 바랍니다.")
+                    '''await ctx.reply(content=f"```가입을 환영합니다!\n"
+                                     "필독하셔서 게임 진행이나 서버 이용에 차질 없도록 부탁드리겠습니다.```"
+                                     "https://cafe.naver.com/cyberearlyfootballc/18267\n"
+                                     "저희 C.E.F는 토요일을 제외한 매 저녁 9시부터 11시 30분까지 각 팀에 소속되어 게임하게 됩니다.\n"
+                                     f"팀을 구하실 때는 아무런 채널에 '%FA역할부여' 명령어를 사용한 후\n"
+                                     f"{team_channel.mention} 채널 혹은 {player_channel.mention} 채널을 이용하시기 바랍니다.")'''
                     await channel.send(content=f"<신규가입> {ctx.author.mention} (가입일자 : {now_time})")
 
             else:
@@ -954,7 +1038,18 @@ async def 가입(ctx):
             role = get(ctx.guild.roles, name='CEF')
             await user.add_roles(role)
             channel = get(ctx.guild.channels, name='가입-탈퇴-명단')
-            await ctx.reply("```복귀를 환영합니다!```")
+            await ctx.reply("```복귀를 환영합니다!```"
+                                            "필독하셔서 게임 진행이나 서버 이용에 차질 없도록 부탁드리겠습니다.\n```"
+                                            "https://cafe.naver.com/cyberearlyfootballc/18267\n"
+                                            "저희 C.E.F는 토요일을 제외한 매 저녁 9시부터 11시 30분까지 각 팀에 소속되어 게임하게 됩니다.\n"
+                                            f"팀을 구하실 때는 아무런 채널에 '%FA역할부여' 명령어를 사용한 후\n"
+                                            f"'팀-홍보' 채널 혹은 '선수-홍보' 채널을 이용하시기 바랍니다.")
+            '''await ctx.reply("```복귀를 환영합니다!```"
+                                            "필독하셔서 게임 진행이나 서버 이용에 차질 없도록 부탁드리겠습니다.```"
+                                            "https://cafe.naver.com/cyberearlyfootballc/18267\n"
+                                            "저희 C.E.F는 토요일을 제외한 매 저녁 9시부터 11시 30분까지 각 팀에 소속되어 게임하게 됩니다.\n"
+                                            f"팀을 구하실 때는 아무런 채널에 '%FA역할부여' 명령어를 사용한 후\n"
+                                            f"{team_channel.mention} 채널 혹은 {player_channel.mention} 채널을 이용하시기 바랍니다.")'''
             await channel.send(content=f"<재가입> {ctx.author.mention} (가입일자 : {now_time})")
 
         # 신규 & 닉네임 중복일 경우
@@ -1115,8 +1210,8 @@ async def 리셋(ctx):
         if key1 == 0:
             await ctx.send(content=f"```스프레드 시트 명단에서 {ctx.author.display_name}님의 고유 ID 번호를 검색할 수 없습니다.\n```")
     else :
-        await ctx.send('닉네임 변경이 불가합니다.\n'
-                       '변경 기간이 아닙니다.')
+        await ctx.send('```현재 닉네임 변경이 불가합니다.\n'
+                       '스태프를 멘션하여 요청해주세요.```')
 
 
 # 주 포지션 업데이트
@@ -1224,7 +1319,7 @@ async def 부포삭제(ctx):
                                f"%가입 명령어를 사용해 스프레드 시트에 등록하거나\n"
                                f"%닉변 명령어를 사용해 닉네임을 업데이트해주세요.```")
 
-
+'''
 # 닉네임 업데이트
 @bot.command()
 async def 닉변(ctx):
@@ -1232,13 +1327,13 @@ async def 닉변(ctx):
 
     if SWITCH_NICKNAME_CHANGE:
         role_names = [role.name for role in ctx.author.roles]
-        '''
-        if not "신규" in role_names: # '신규' 역할이 있을 시
-            await ctx.send("```현재 닉네임 변경 기간이 아닙니다.\n"
-                           "2월의 닉변 변경일은 2월 12일, 26일 입니다.```")
+
+        #if not "신규" in role_names: # '신규' 역할이 있을 시
+        #    await ctx.send("```현재 닉네임 변경 기간이 아닙니다.\n"
+        #                   "2월의 닉변 변경일은 2월 12일, 26일 입니다.```")
         
-        if "신규" in role_names: # '신규' 역할이 없을 시
-        '''
+        #if "신규" in role_names: # '신규' 역할이 없을 시
+
         key = 0
 
         # 범위(체크)
@@ -1325,7 +1420,8 @@ async def 닉변(ctx):
     else:
         await ctx.send('닉네임 변경 기간이 아닙니다.')
     await ctx.message.delete()
-
+    
+'''
 
 # 역할 부여하기
 @bot.command()
@@ -1595,7 +1691,7 @@ async def 커리어(ctx, text, member: discord.Member):
                 else:
                     key = 0
         if key == 0:
-            await ctx.send(content=f"```스프레드 시트에서 {ctx.author.display_name}님의 이름을 검색할 수 없습니다.\n"
+            await ctx.send(content=f"```스프레드 시트에서 {member.display_name}님의 이름을 검색할 수 없습니다.\n"
                                    f"%가입 명령어를 사용해 스프레드 시트에 등록하거나\n"
                                    f"%닉변 명령어를 사용해 닉네임을 업데이트해주세요.```")
 
@@ -1632,9 +1728,9 @@ async def 내정보(ctx):
             val = worksheet_career.acell('N' + str(check)).value
             before_val = worksheet_career.acell('O' + str(check)).value
             naejeon = worksheet_career.acell('P' + str(check)).value
-            price = worksheet_career.acell('Q' + str(check)).value
-            presentWallet = worksheet_career.acell('R' + str(check)).value
-            totalWallet = worksheet_career.acell('S' + str(check)).value
+            #price = worksheet_career.acell('Q' + str(check)).value
+            #presentWallet = worksheet_career.acell('R' + str(check)).value
+            #totalWallet = worksheet_career.acell('S' + str(check)).value
 
     if key == 1:
         if "/" in ctx.author.display_name:
@@ -1645,9 +1741,9 @@ async def 내정보(ctx):
             bupo = b[0]
 
             embed = discord.Embed(title=f"내 정보", description=f"{ctx.author.display_name} 님의 정보창", color=0xFF007F)
-            embed.add_field(name="이적료", value=price + " 억원", inline=True)
-            embed.add_field(name="현재 자산", value=fun.caculateUnit(presentWallet), inline=True)
-            embed.add_field(name="누적 자산", value=fun.caculateUnit(totalWallet), inline=True)
+            #embed.add_field(name="이적료", value=price + " 억원", inline=True)
+            #embed.add_field(name="현재 자산", value=fun.caculateUnit(presentWallet), inline=True)
+            #embed.add_field(name="누적 자산", value=fun.caculateUnit(totalWallet), inline=True)
             embed.add_field(name="소속팀", value=f"{team}", inline=True)
             embed.add_field(name="주포지션", value=jupo, inline=True)
             embed.add_field(name="부포지션", value=bupo, inline=True)
@@ -1672,9 +1768,9 @@ async def 내정보(ctx):
             bupo = "없음"
 
             embed = discord.Embed(title=f"내 정보", description=f"{ctx.author.display_name} 님의 정보창", color=0xFF007F)
-            embed.add_field(name="이적료", value=price + " 억원", inline=True)
-            embed.add_field(name="현재 자산", value=fun.caculateUnit(presentWallet), inline=True)
-            embed.add_field(name="누적 자산", value=fun.caculateUnit(totalWallet), inline=True)
+            #embed.add_field(name="이적료", value=price + " 억원", inline=True)
+            #embed.add_field(name="현재 자산", value=fun.caculateUnit(presentWallet), inline=True)
+            #embed.add_field(name="누적 자산", value=fun.caculateUnit(totalWallet), inline=True)
             embed.add_field(name="소속팀", value=f"{team}", inline=True)
             embed.add_field(name="주포지션", value=jupo, inline=True)
             embed.add_field(name="부포지션", value=bupo, inline=True)
@@ -2766,12 +2862,13 @@ async def 출석공지(ctx):
 @bot.command(aliases=['종공'])
 async def 종료공지(ctx):
     emojis = ""
-    a_team_chat_id = get(ctx.guild.channels, name='ʀᴍᴀ-팀채팅')
-    b_team_chat_id = get(ctx.guild.channels, name='ʟɪᴠ-팀채팅')
+    a_team_chat_id = get(ctx.guild.channels, name='ʀᴀɴ-팀채팅')
+    b_team_chat_id = get(ctx.guild.channels, name='ᴊᴜᴠ-팀채팅')
     c_team_chat_id = get(ctx.guild.channels, name='sᴄʜ_팀채팅')
-    d_team_chat_id = get(ctx.guild.channels, name='ᴀʀꜱ-팀채팅')
-    e_team_chat_id = get(ctx.guild.channels, name='ʙʜᴀ_팀채팅')
-    f_team_chat_id = get(ctx.guild.channels, name='ꜰʀᴀ-팀채팅')
+    d_team_chat_id = get(ctx.guild.channels, name='ᴀᴛᴍ-팀채팅')
+    e_team_chat_id = get(ctx.guild.channels, name='ɪᴜꜰᴄ-팀채팅')
+    f_team_chat_id = get(ctx.guild.channels, name='ꜰᴄʙ-팀채팅')
+    g_team_chat_id = get(ctx.guild.channels, name='𝗠𝟬𝟱-팀채팅')
     emoji = "<:__:708304488217313371>"
     for i in range(0, 10):
         emojis = emojis + emoji
@@ -2800,15 +2897,25 @@ async def 종료공지(ctx):
     await f_team_chat_id.send(content=f"{emojis}\n")
     await f_team_chat_id.send(content=f"{msg}\n"
                                       f"{url}")
-#@bot.command()
-#async def 반복멘션(ctx, member:discord.Member):
-#    for i in range(100):
-#        await ctx.send(content=f"{member.mention}")
+
+    await g_team_chat_id.send(content=f"{emojis}\n")
+    await g_team_chat_id.send(content=f"{msg}\n"
+                                      f"{url}")
+
+@bot.command()
+async def 반복멘션(ctx, member:discord.Member):
+    role_names = [role.name for role in ctx.author.roles]
+    if "스태프" in role_names or "머장" in role_names:
+        for i in range(10):
+            await ctx.send(content=f"{member.mention}")
+    else:
+        await ctx.send(content=f"스태프만 사용가능합니다.")
 
 
 @bot.command()
 async def 구매완료(ctx):
-    role_names = [role.name for role in ctx.author.roles]
+    await ctx.reply("해당 명령어는 비활성화되었습니다.")
+    '''role_names = [role.name for role in ctx.author.roles]
 
     if '피파23 구매자' not in role_names:
         user = ctx.author
@@ -2836,12 +2943,13 @@ async def 구매완료(ctx):
                 elif msg.content.lower() == '2':
                     await ctx.reply("구매 이후에 다시 시도해주세요.")
     else:
-        await ctx.reply("이미 '피파23 구매자' 역할을 갖고 있습니다.")
+        await ctx.reply("이미 '피파23 구매자' 역할을 갖고 있습니다.")'''
 
 
 @bot.command()
 async def 구매예정(ctx):
-    role_names = [role.name for role in ctx.author.roles]
+    await ctx.reply("해당 명령어는 비활성화되었습니다.")
+    '''role_names = [role.name for role in ctx.author.roles]
 
     if '구매 예정' not in role_names:
         user = ctx.author
@@ -2852,7 +2960,7 @@ async def 구매예정(ctx):
             await user.add_roles(Role23)
             await ctx.reply("구매 예정자 역할 부여 완료")
     else:
-        await ctx.reply("이미 '구매 예정' 역할을 갖고 있습니다.")
+        await ctx.reply("이미 '구매 예정' 역할을 갖고 있습니다.")'''
 
 
 @bot.command()
@@ -3205,60 +3313,541 @@ async def 이적(ctx, before, current, member: discord.Member, price):
 '''
 @bot.command()
 async def 팀명단(ctx, *, team_name):
-    if team_name.lower() == "real madrid" or team_name.lower() == "rma":
-        full_name = "Real Madrid"
-        switch = True
-    elif team_name.lower() == "liverpool fc" or team_name.lower() == "liv":
-        full_name = "Liverpool FC"
-        switch = True
-    elif team_name.lower() == "brighton" or team_name.lower() == "brt" or team_name.lower() == 'bra':
-        full_name = "Brighton"
-        switch = True
-    elif team_name.lower() == "arsenal fc" or team_name.lower() == "ars":
-        full_name = "Arsenel FC"
-        switch = True
-    elif team_name.lower() == "schema of soccer" or team_name.lower() == "sch":
-        full_name = "Schema Of Soccer"
-        switch = True
-    elif team_name.lower() == "france" or team_name.lower() == "fra":
-        full_name = "France"
-        switch = True
-    elif team_name.lower() == "fc barcelona" or team_name.lower() == "fcb":
-        full_name = "FC Barcelona"
-        switch = True
+    total = 0
+    st = []
+    lw = []
+    rw = []
+    cam = []
+    cm = []
+    cdm = []
+    lb = []
+    cb = []
+    rb = []
+    gk = []
+    st_str = ''
+    lw_str = ''
+    rw_str = ''
+    cam_str = ''
+    cm_str = ''
+    cdm_str = ''
+    lb_str = ''
+    cb_str = ''
+    rb_str = ''
+    gk_str = ''
+
+    Role = get(ctx.guild.roles, name=team_name)
+    # Role = get(ctx.guild.roles, name="FC Barcelona")
+    for member in Role.members :
+
+        if "[" in member.display_name :
+            print(member.display_name, myfun.getJupoFromDisplayname2(member.display_name))
+            if myfun.getJupoFromDisplayname2(member.display_name) == 'ST' :
+                st.append(myfun.getNickFromDisplayname2(member.display_name))
+                total += 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'LW' :
+                lw.append(myfun.getNickFromDisplayname2(member.display_name))
+                total += 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'RW' :
+                rw.append(myfun.getNickFromDisplayname2(member.display_name))
+                total += 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'CAM' :
+                cam.append(myfun.getNickFromDisplayname2(member.display_name))
+                total += 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'CM' :
+                cm.append(myfun.getNickFromDisplayname2(member.display_name))
+                total += 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'CDM' :
+                cdm.append(myfun.getNickFromDisplayname2(member.display_name))
+                total += 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'LB' :
+                lb.append(myfun.getNickFromDisplayname2(member.display_name))
+                total += 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'CB' :
+                cb.append(myfun.getNickFromDisplayname2(member.display_name))
+                total += 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'RB' :
+                rb.append(myfun.getNickFromDisplayname2(member.display_name))
+                total += 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'GK' :
+                gk.append(myfun.getNickFromDisplayname2(member.display_name))
+                total += 1
+
+    for i in st :
+        st_str = st_str + i + "\n"
+    for i in lw :
+        lw_str = lw_str + i + "\n"
+    for i in rw :
+        rw_str = rw_str + i + "\n"
+    for i in cam :
+        cam_str = cam_str + i + "\n"
+    for i in cm :
+        cm_str = cm_str + i + "\n"
+    for i in cdm :
+        cdm_str = cdm_str + i + "\n"
+    for i in lb :
+        lb_str = lb_str + i + "\n"
+    for i in cb :
+        cb_str = cb_str + i + "\n"
+    for i in rb :
+        rb_str = rb_str + i + "\n"
+    for i in gk :
+        gk_str = gk_str + i + "\n"
+
+    embed = discord.Embed(title=f"{team_name} 현황", description=f"총원 : {total} 명", color=0xFF007F)
+    embed.add_field(name="ST", value=st_str, inline=True)
+    embed.add_field(name="LW", value=lw_str, inline=True)
+    embed.add_field(name="RW", value=rw_str, inline=True)
+    embed.add_field(name="CAM", value=cam_str, inline=True)
+    embed.add_field(name="CM", value=cm_str, inline=True)
+    embed.add_field(name="CDM", value=cdm_str, inline=True)
+    embed.add_field(name="LB", value=lb_str, inline=True)
+    embed.add_field(name="CB", value=cb_str, inline=True)
+    embed.add_field(name="RB", value=rb_str, inline=True)
+    embed.add_field(name="GK", value=gk_str, inline=True)
+
+    await ctx.send(embed=embed)
+
+
+@bot.command()
+async def 포지션현황(ctx, *, role_name):
+#async def 포지션현황(ctx, role:discord.Role):
+    st_count = 0
+    lw_count = 0
+    rw_count = 0
+    cam_count = 0
+    cm_count = 0
+    cdm_count = 0
+    lb_count = 0
+    cb_count = 0
+    rb_count = 0
+    gk_count = 0
+    num = 0
+    total = 0
+    newbie_count = 0
+    role = get(ctx.guild.roles, name=role_name)
+
+    if role_name == "FA (무소속)":
+        fa_role = get(ctx.guild.roles, name="FA (무소속)")
+        for member in fa_role.members:
+            role_names = [role.name for role in member.roles]
+            if "신규" in role_names:
+                newbie_count += 1
+
+    for member in role.members:
+        total += 1
+        if "[" in member.display_name :
+            print(member.display_name, myfun.getJupoFromDisplayname2(member.display_name))
+            if myfun.getJupoFromDisplayname2(member.display_name) == 'ST' :
+                st_count = st_count + 1
+                num = num + 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'LW' :
+                lw_count = st_count + 1
+                num = num + 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'RW' :
+                rw_count = rw_count + 1
+                num = num + 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'CAM' :
+                cam_count = cam_count + 1
+                num = num + 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'CM' :
+                cm_count = cm_count + 1
+                num = num + 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'CDM' :
+                cdm_count = cdm_count + 1
+                num = num + 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'LB' :
+                lb_count = lb_count + 1
+                num = num + 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'CB' :
+                cb_count = cb_count + 1
+                num = num + 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'RB' :
+                rb_count = rb_count + 1
+                num = num + 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'GK' :
+                gk_count = gk_count + 1
+                num = num + 1
+
+    embed = discord.Embed(title=f"{role_name} 역할 주포지션 현황", description=f"총원 : {total} 명", color=0xFF007F)
+    embed.add_field(name="ST", value=str(st_count) + " 명", inline=True)
+    embed.add_field(name="LW", value=str(lw_count) + " 명", inline=True)
+    embed.add_field(name="RW", value=str(rw_count) + " 명", inline=True)
+    embed.add_field(name="CAM", value=str(cam_count) + " 명", inline=True)
+    embed.add_field(name="CM", value=str(cm_count) + " 명", inline=True)
+    embed.add_field(name="CDM", value=str(cdm_count) + " 명", inline=True)
+    embed.add_field(name="LB", value=str(lb_count) + " 명", inline=True)
+    embed.add_field(name="CB", value=str(cb_count) + " 명", inline=True)
+    embed.add_field(name="RB", value=str(rb_count) + " 명", inline=True)
+    embed.add_field(name="GK", value=str(gk_count) + " 명", inline=True)
+    if role_name == "FA (무소속)":
+        embed.add_field(name="신규", value=str(newbie_count) + " 명", inline=True)
+        embed.add_field(name="기존", value=str(total-newbie_count) + " 명", inline=True)
+    embed.set_footer(text="Copyright ⓒ 2020-2023 타임제이(TimeJ) in C.E.F All Right Reserved.")
+    await ctx.message.delete()
+    await ctx.send(embed=embed)
+'''
+
+    await ctx.send(content=f"{role_name} 주포지션 현황\n"
+                           f"총 집계 인원 : {total} 명\n"
+                           f"ST : {st_count} 명, LW : {lw_count} 명, RW : {rw_count} 명\n"
+                           f"CAM : {cam_count} 명, CM : {cm_count} 명, CDM : {cdm_count} 명\n"
+                           f"LB : {lb_count} 명, CB : {cb_count}, RB : {rb_count} 명\n"
+                           f"GK : {gk_count} 명")'''
+
+@bot.command()
+async def 잠수제거(ctx):
+    role_names = [role.name for role in ctx.author.roles]
+    if "스태프" in role_names:
+        CEF_ROLE = get(ctx.guild.roles, name='CEF')
+        FIFA23_ROLE = get(ctx.guild.roles, name='피파23 구매자')
+
+        now = datetime.datetime.now()
+        now_time = now.strftime('%Y-%m-%d %H:%M:%S')
+        #CEF_ROLE = get(ctx.guild.roles, name='테스트1')
+        #FIFA23_ROLE = get(ctx.guild.roles, name='테스트2')
+
+        for member in CEF_ROLE.members:
+            print(member.display_name)
+            if not FIFA23_ROLE in member.roles:
+                await ctx.send(content=f"{member.mention} - CEF 권한 삭제 (역할 제거 일자 : {now_time})")
+                await member.remove_roles(CEF_ROLE)
     else:
-        await ctx.reply("팀명을 잘못 입력하였습니다.")
-    print(full_name)
-    print(switch)
+        await ctx.reply("스태프만 사용 가능합니다.")
+
+
+@bot.command(aliases=["FA"])
+async def FA역할부여(ctx):
+    FA_Role = get(ctx.guild.roles, name="FA (무소속)")
+    team_list = ["Real Madrid", "Liverpool FC", "Atlético de Madrid", "Juventus", "FC Barcelona", "Schema Of Soccer",
+                 "FSV mainz 05", "EVT", "FA"]
+    role_list = [role.name for role in ctx.author.roles]
+    #print(role_list)
+    switch = True
+    for team_name in team_list:
+        if not team_name in role_list:
+            switch = False
+            #print(team_name, switch)
+        else:
+            switch = True
+            #print(team_name, switch)
+            break
+
     if switch:
-        role = get(ctx.guild.roles, name=full_name)
-
-        text = ''
-        for member in role.members:
-            text = text + myfun.getNickFromDisplayname2(member.display_name) + "\n"
-        #await ctx.send(text)
-
-        if full_name == "Real Madrid":
-            logo_url = "https://cdn.discordapp.com/emojis/1037534401547993158.webp?size=96&quality=lossless"
-        elif full_name == "Liverpool FC":
-            logo_url = "https://cdn.discordapp.com/emojis/1051807862264954900.webp?size=96&quality=lossless"
-        elif full_name == "Brighton":
-            logo_url = "https://cdn.discordapp.com/emojis/1051808627037573180.webp?size=96&quality=lossless"
-        elif full_name == "Arsenel FC":
-            logo_url = "https://cdn.discordapp.com/emojis/1051525965869752360.webp?size=96&quality=lossless"
-        elif full_name == "Schema Of Soccer":
-            logo_url = "https://cdn.discordapp.com/emojis/1038825649168711690.webp?size=96&quality=lossless"
-        elif full_name == "France":
-            logo_url = "https://cdn.discordapp.com/emojis/1051810850467483679.webp?size=96&quality=lossless"
-        elif full_name == "FC Barcelona":
-            logo_url = "https://cdn.discordapp.com/emojis/1010626203310374953.webp?size=96&quality=lossless"
+        await ctx.reply(content=f"{ctx.author.mention}, 이미 소속이 있습니다.")
+    else:
+        user = ctx.author
+        await user.add_roles(FA_Role)
+        await ctx.reply(content=f"{ctx.author.mention}, FA 권한 부여가 완료되었습니다.")
 
 
-        embed = discord.Embed(title=f"{full_name}", color=0xFF007F)
-        embed.set_thumbnail(url=logo_url)
-        embed.add_field(name="팀원 명단", value=text, inline=True)
-        embed.set_footer(text="Copyright ⓒ 2020-2023 타임제이(TimeJ) in C.E.F All Right Reserved.")
-        await ctx.send(embed=embed)
+@bot.command(aliases=["FA제거"])
+async def FA역할초기화(ctx):
+    FA_Role = get(ctx.guild.roles, name="FA (무소속)")
+    for member in FA_Role.members:
+        await member.remove_roles(FA_Role)
+        await ctx.send(content=f"{myfun.getNickFromDisplayname2(member.display_name)} - FA역할 제거 완료")
+
+@bot.command(aliases=["신규제거"])
+async def 신규기간초과(ctx):
+    role_names = [role.name for role in ctx.author.roles]
+    if "스태프" in role_names:
+        newbie_Role = get(ctx.guild.roles, name="신규")
+        for member in newbie_Role.members:
+            key = 0
+            # 범위(체크)
+            cell_max = worksheet_list.acell('A1').value
+            # 범위 내 셀 값 로딩
+            range_list = worksheet_list.range('D2:D' + cell_max)
+            # 스프레드 체크 및 업데이트
+            for i, cell in enumerate(range_list) :
+                if str(cell.value) == str(member.id) :
+                    check = i + 2
+                    key = 1
+                    join_date = worksheet_list.acell('B' + str(check)).value
+                    temp = join_date.split(" ")
+                    print(temp[0], temp[1])
+                    temp2 = temp[0].split("-")
+                    year = int(temp2[0])
+                    month = int(temp2[1])
+                    day = int(temp2[2])
+
+                    now_time = datetime.datetime.now()
+                    join_datetime = datetime.datetime(year, month, day)
+                    result = now_time - join_datetime
+                    await ctx.send(content=f"{member.display_name} - 가입일 : {join_date} / {result.days}")
+                    print(result.days, type(result.days))
+                    if result.days >= 30:
+                        nickname = member.display_name.replace('🐤', '')
+                        await member.edit(nick=nickname)
+                        await member.remove_roles(newbie_Role)
+                        staff_channel_id = get(ctx.guild.text_channels, id=707986001036836941)
+                        join_list_channel_id = get(ctx.guild.text_channels, id=853895519030083584)
+                        await staff_channel_id.send(content=f"{myfun.getNickFromDisplayname2(member.display_name)}"
+                                                            f" - 가입일 : {join_date} / {result.days} 일 경과로 신규 역할 제거 완료")
+                        await join_list_channel_id.send(content=f"{member.mention} - 가입일 : {join_date} / {result.days} 일 경과로 신규 역할 제거")
+                    time.sleep(2)
+    else:
+        await ctx.reply("스태프만 사용 가능합니다.")
+
+
+@bot.command(aliases=["FA현황"])
+async def FA유저현황(ctx):
+    total = 0
+    st = []
+    lw = []
+    rw = []
+    cam = []
+    cm = []
+    cdm = []
+    lb = []
+    cb = []
+    rb = []
+    gk = []
+    st_str = ''
+    lw_str = ''
+    rw_str = ''
+    cam_str = ''
+    cm_str = ''
+    cdm_str = ''
+    lb_str = ''
+    cb_str = ''
+    rb_str = ''
+    gk_str = ''
+
+    Role = get(ctx.guild.roles, name="FA (무소속)")
+    #Role = get(ctx.guild.roles, name="FC Barcelona")
+    for member in Role.members:
+
+        if "[" in member.display_name :
+            print(member.display_name, myfun.getJupoFromDisplayname2(member.display_name))
+            if myfun.getJupoFromDisplayname2(member.display_name) == 'ST' :
+                st.append(myfun.getNickFromDisplayname2(member.display_name))
+                total += 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'LW' :
+                lw.append(myfun.getNickFromDisplayname2(member.display_name))
+                total += 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'RW' :
+                rw.append(myfun.getNickFromDisplayname2(member.display_name))
+                total += 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'CAM' :
+                cam.append(myfun.getNickFromDisplayname2(member.display_name))
+                total += 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'CM' :
+                cm.append(myfun.getNickFromDisplayname2(member.display_name))
+                total += 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'CDM' :
+                cdm.append(myfun.getNickFromDisplayname2(member.display_name))
+                total += 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'LB' :
+                lb.append(myfun.getNickFromDisplayname2(member.display_name))
+                total += 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'CB' :
+                cb.append(myfun.getNickFromDisplayname2(member.display_name))
+                total += 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'RB' :
+                rb.append(myfun.getNickFromDisplayname2(member.display_name))
+                total += 1
+            elif myfun.getJupoFromDisplayname2(member.display_name) == 'GK' :
+                gk.append(myfun.getNickFromDisplayname2(member.display_name))
+                total += 1
+
+    for i in st:
+        st_str = st_str + i + "\n"
+    for i in lw:
+        lw_str = lw_str + i + "\n"
+    for i in rw:
+        rw_str = rw_str + i + "\n"
+    for i in cam:
+        cam_str = cam_str + i + "\n"
+    for i in cm:
+        cm_str = cm_str + i + "\n"
+    for i in cdm:
+        cdm_str = cdm_str + i + "\n"
+    for i in lb:
+        lb_str = lb_str + i + "\n"
+    for i in cb:
+        cb_str = cb_str + i + "\n"
+    for i in rb:
+        rb_str = rb_str + i + "\n"
+    for i in gk:
+        gk_str = gk_str + i + "\n"
+
+    embed = discord.Embed(title=f"FA 명단 현황", description=f"총원 : {total} 명", color=0xFF007F)
+    embed.add_field(name="ST", value=st_str, inline=True)
+    embed.add_field(name="LW", value=lw_str, inline=True)
+    embed.add_field(name="RW", value=rw_str, inline=True)
+    embed.add_field(name="CAM", value=cam_str, inline=True)
+    embed.add_field(name="CM", value=cm_str, inline=True)
+    embed.add_field(name="CDM", value=cdm_str, inline=True)
+    embed.add_field(name="LB", value=lb_str, inline=True)
+    embed.add_field(name="CB", value=cb_str, inline=True)
+    embed.add_field(name="RB", value=rb_str, inline=True)
+    embed.add_field(name="GK", value=gk_str, inline=True)
+
+    await ctx.send(embed=embed)
+
+
+@bot.command(aliases=["신규현황"])
+async def 신규유저현황(ctx):
+    newbie_Role = get(ctx.guild.roles, name="신규")
+    rma_count = 0
+    psg_count = 0
+    atm_count = 0
+    sch_count = 0
+    fcb_count = 0
+    m05_count = 0
+    eve_count = 0
+    fa_count = 0
+    total_count = 0
+    CEF_Role = get(ctx.guild.roles, name="CEF")
+    for member in newbie_Role.members:
+        role_names = [role.name for role in member.roles]
+        total_count += 1
+        if "Real Madrid" in role_names:
+            rma_count += 1
+        elif "PSG" in role_names:
+            psg_count += 1
+        elif "Atlético de Madrid" in role_names:
+            atm_count += 1
+        elif "Schema Of Soccer" in role_names:
+            sch_count += 1
+        elif "FC Barcelona" in role_names:
+            fcb_count += 1
+        elif "FSV mainz 05" in role_names:
+            m05_count += 1
+        elif "FA (무소속)" in role_names:
+            fa_count += 1
+
+    for member in CEF_Role.members:
+        role_names2 = [role.name for role in member.roles]
+        if "EVT" in role_names2:
+            eve_count +=1
+
+    embed = discord.Embed(title=f"신규 유저 소속 현황", color=0xFF007F)
+    # embed.set_thumbnail(url=logo_url)
+    embed.add_field(name="RMA", value=str(rma_count) + " 명", inline=True)
+    embed.add_field(name="PSG", value=str(psg_count) + " 명", inline=True)
+    embed.add_field(name="SCH", value=str(sch_count) + " 명", inline=True)
+    embed.add_field(name="ATM", value=str(atm_count) + " 명", inline=True)
+    embed.add_field(name="FCB", value=str(fcb_count) + " 명", inline=True)
+    embed.add_field(name="M05", value=str(m05_count) + " 명", inline=True)
+    embed.add_field(name="EVE(임대)", value=str(eve_count) + " 명", inline=True)
+    embed.add_field(name="FA", value=str(fa_count) + " 명", inline=True)
+    embed.add_field(name="전체 신규", value=str(total_count) + " 명", inline=True)
+    embed.set_footer(text="Copyright ⓒ 2020-2023 타임제이(TimeJ) in C.E.F All Right Reserved.")
+    await ctx.message.delete()
+    await ctx.send(embed=embed)
+
+
+@bot.command()
+async def 이모지제거(ctx, imoji):
+    cef_role = get(ctx.guild.roles, name="CEF")
+    imoji_list = ["🌺", "🍀", "🌱"]
+    if imoji == "내전리그":
+        for member in cef_role.members:
+            for imoji2 in imoji_list:
+                if imoji2 in member.display_name:
+                    nick = member.display_name.replace(imoji2, "")
+                    await member.edit(nick=nick)
+                    await ctx.send(content=f"{myfun.getNickFromDisplayname2(member.display_name)} - {imoji2} 제거 완료")
+    else:
+        for member in cef_role.members:
+            if imoji in member.display_name:
+                nick = member.display_name.replace(imoji, "")
+                await member.edit(nick=nick)
+                await ctx.send(content=f"{myfun.getNickFromDisplayname2(member.display_name)} - {imoji} 제거 완료")
+
+    await ctx.reply(content=f"{imoji} 이모지 제거 완료")
+
+@bot.command()
+async def 바르샤정보기입(ctx):
+
+    conn = sqlite3.connect("FCB.db")
+    fcb = get(ctx.guild.roles, name="FC Barcelona")
+    for member in fcb.members :
+        role_names = [role.name for role in member.roles]
+        if "FCB 1군 계약" in role_names:
+            data_list = [member.id, myfun.getNickFromDisplayname2(member.display_name),
+                         myfun.getJupoFromDisplayname2(member.display_name), "1군", 0]
+        elif "La Masia" in role_names:
+            data_list = [member.id, myfun.getNickFromDisplayname2(member.display_name),
+                         myfun.getJupoFromDisplayname2(member.display_name), "유스", 0]
+        print(data_list)
+        cur = conn.cursor()
+        cur.execute("INSERT INTO fcb_info(id, nickname, position, belong, count) VALUES(?,?,?,?,?)", data_list)
+    conn.commit()
+    conn.close()
+
+@bot.command()
+async def 출석체크(ctx, num, text):
+    role_names = [role.name for role in ctx.author.roles]
+    # 바르셀로나 소속 확인
+    if "FC Barcelona" in role_names:
+        await ctx.reply("현재 해당 명령어는 테스트 단계로 바르셀로나에만 적용되어 있습니다.")
+    else:
+        # 테이블 존재 여부 확인
+        conn = sqlite3.connect("FCB.db")
+        cur = conn.cursor()
+
+        cur.execute("SELECT COUNT(*) FROM sqlite_master WHERE name=?", )
+
+@bot.command()
+async def 임시(ctx):
+    li = ["JUV", "ITA", "ITA U-20", "FCB", "LMS", "SCH", "OOL", "RAN", "WOL", "EVE"]
+    #li2 = ["JUV", "ITA", "ITA U-20", "FCB", "LMS", "SCH", "OOL", "RAN", "WOL", "EVE"]
+    for i in range(10):
+        temp = random.choice(li)
+        await ctx.send(content=f"{temp}")
+        li.remove(temp)
+
+
+@bot.command(aliases=["KPA"])
+async def kpa(ctx):
+    role_names = [role.name for role in ctx.author.roles]
+    role_list = ["CEF", "EVE", "Juventus", "Atlético de Madrid", "Schema Of Soccer", "FC Barcelona", "FSV mainz 05",
+                 "Rangers FC", "Incheon United FC"]
+    kpa = get(ctx.guild.roles, name='KPA')
+    switch = True
+    for role in role_list:
+        if role in role_names:
+            switch = False
+            break
+        else:
+            switch = True
+
+
+    if switch:
+        user = ctx.author
+        await user.add_roles(kpa)
+        await ctx.reply("KPA 역할 부여 완료")
+
+    else:
+        await ctx.reply("역할 부여 불가")
+
+
+"""
+@bot.command()
+async def FA전체부여(ctx):
+    CEF_ROLE = get(ctx.guild.roles, name='테스트1')
+    team_list = ["Real Madrid", "Liverpool FC", "Atlético de Madrid", "Juventus", "FC Barcelona", "Schema Of Soccer", "FSV mainz 05", "EVT"]
+
+    for member in CEF_ROLE.members:
+        switch = True
+        role_list = [role.name for role in member.roles]
+        for team_name in team_list:
+            if team_name in role_list:
+                switch = False
+                print(team_name, switch)
+                pass
+
+        if switch:
+            FA_Role = get(ctx.guild.roles, name="FA")
+            await member.add_roles(FA_Role)
+            await ctx.send(content=f"{myfun.getJupoFromDisplayname2(member.display_name)} - FA 권한 부여")
+"""
+
+
+
 
 @bot.event
 async def on_reaction_add(reaction, user):
@@ -3317,6 +3906,129 @@ async def on_reaction_add(reaction, user):
                 check = i + 2
                 worksheet_join.update_acell('G' + str(check), str(emo))
 
+
+@bot.event
+async def on_member_update(before, after):
+    if before.nick != after.nick and after.nick is not None:
+        nickname_log_channel = bot.get_channel(1055799480328409158)
+        user = bot.get_user(before.id)
+        async for entry in before.guild.audit_logs(limit=1, action=discord.AuditLogAction.member_update) :
+            print(f"{entry.user} changed role {entry.target}")
+        import datetime
+        #embed = discord.Embed(title="닉네임 변경", description=before.name + "#" + before.discriminator, timestamp=datetime.datetime.now())
+        embed = discord.Embed(timestamp=datetime.datetime.now())
+        embed.set_author(name=before.name + "#" + before.discriminator, icon_url=f'{before.display_avatar}')
+        embed.add_field(name="변경 전", value=before.nick)
+        embed.add_field(name="변경 후", value=after.nick)
+        embed.add_field(name="변경자", value=entry.user, inline=False)
+        embed.set_footer(text="ID: " + str(before.id))
+        await nickname_log_channel.send(embed=embed)
+
+    elif before.roles != after.roles:
+        role_log_channel = bot.get_channel(1058654744865943602)
+        before_role_list = [role for role in before.roles]
+        after_role_list = [role for role in after.roles]
+        async for entry in before.guild.audit_logs(limit=1, action=discord.AuditLogAction.member_role_update):
+            pass
+        import datetime
+        if len(before_role_list) > len(after_role_list):
+            embed = discord.Embed(timestamp=datetime.datetime.now(), color=discord.Color.red())
+            for role in after_role_list:
+                before_role_list.remove(role)
+            embed.add_field(name="변경 내용", value=before_role_list[0].mention + " 제거")
+        elif len(before_role_list) < len(after_role_list):
+            embed = discord.Embed(title=before.name + "#" + before.discriminator,
+                                  timestamp=datetime.datetime.now(), color=discord.Color.blue())
+            for role in before_role_list:
+                after_role_list.remove(role)
+            embed.add_field(name="변경 내용", value=after_role_list[0].mention + " 추가")
+        embed.set_author(name=before.name + "#" + before.discriminator, icon_url=f'{before.display_avatar}')
+        embed.add_field(name="변경자", value=entry.user, inline=False)
+        # embed.set_footer(text="ID: " + member.id)
+
+        embed.set_footer(text="ID: " + str(before.id))
+        await role_log_channel.send(embed=embed)
+
+
+@bot.event
+async def on_message_edit(message_before, message_after):
+    if not message_before.author.bot :
+        embed = discord.Embed(timestamp=datetime.datetime.now(), color=discord.Color.yellow())
+        embed.add_field(name="작성자", value=message_before.author.mention, inline=False)
+        embed.add_field(name="변경 전", value=message_before.content, inline=False)
+        embed.add_field(name="변경 후", value=message_after.content, inline=False)
+        embed.set_author(name=message_before.name + "#" + message_before.discriminator, icon_url=f'{message_before.display_avatar}')
+        embed.add_field(name="변경된 채널", value=message_before.channel.mention)
+        message_log_channel = bot.get_channel(1056399063291011082)
+        embed.set_footer(text="ID: " + str(message_before.id))
+        await message_log_channel.send(embed=embed)
+
+
+@bot.event
+async def on_message_delete(message):
+    if not message.author.bot :
+        embed = discord.Embed(timestamp=datetime.datetime.now(), color=discord.Color.red())
+        embed.add_field(name="작성자", value=message.author.mention, inline=False)
+        embed.add_field(name="내용", value=message.content, inline=False)
+        embed.add_field(name="삭제된 채널", value=message.channel.mention, inline=False)
+        embed.set_author(name=message.author.name + "#" + message.author.discriminator, icon_url=f'{message.author.display_avatar}')
+        channel = bot.get_channel(1056399063291011082)
+        embed.set_footer(text="ID: " + str(message.id))
+        await channel.send(embed=embed)
+
+
+@bot.event
+async def on_voice_state_update(member, before, after):
+    voice_log_channel = bot.get_channel(1058670949764972544)
+    if before.channel is None and after.channel is not None:
+        embed = discord.Embed(timestamp=datetime.datetime.now(), color=discord.Color.blue(), title="입장")
+        embed.set_author(name=member.name + "#" + member.discriminator, icon_url=f'{member.display_avatar}')
+        embed.add_field(name="유저", value=member.mention)
+        embed.add_field(name="채널", value=after.channel.mention)
+    elif before.channel is not None and after.channel is None:
+        embed = discord.Embed(timestamp=datetime.datetime.now(), color=discord.Color.red(), title="퇴장")
+        embed.add_field(name="유저", value=member.mention)
+        embed.add_field(name="채널", value=before.channel.mention)
+    elif before.channel is not None and after.channel is not None:
+        embed = discord.Embed(timestamp=datetime.datetime.now(), color=discord.Color.yellow(), title="이동")
+        embed.add_field(name="유저", value=member.mention)
+        embed.add_field(name="이전 채널", value=before.channel.mention)
+        embed.add_field(name="이후 채널", value=after.channel.mention)
+    embed.set_author(name=member.name + "#" + member.discriminator, icon_url=f'{member.display_avatar}')
+    embed.set_footer(text="ID: " + str(member.id))
+
+    await voice_log_channel.send(embed=embed)
+
+
+@bot.event
+async def on_member_join(member):
+    # 로그
+    joinleave_log_channel = bot.get_channel(1058676638008741898)
+    create_time = member.created_at
+    import datetime
+    now_time = datetime.datetime.now()
+    c_time = now_time - create_time
+
+    embed = discord.Embed(timestamp=datetime.datetime.now(), color=discord.Color.red())
+    embed.add_field(title="계정 생성일", value=f"{create_time.year}년 {create_time.month}월 {create_time.day}일 ({c_time.days} 일)")
+    embed.set_author(name=member.mention + " " + member.name + "#" + member.discriminator, icon_url=f'{member.display_avatar}')
+    embed.set_footer(text="ID: " + str(member.id))
+    await joinleave_log_channel.send(embed=embed)
+
+@bot.event
+async def on_member_remove(member):
+    joinleave_log_channel = bot.get_channel(1058676638008741898)
+    create_time = member.created_at
+    import datetime
+    now_time = datetime.datetime.now()
+    c_time = now_time - create_time
+
+
+    embed = discord.Embed(timestamp=datetime.datetime.now(), color=discord.Color.red())
+    embed.add_field(title="계정 생성일", value=f"{create_time.year}년 {create_time.month}월 {create_time.day}일 ({c_time.days} 일)")
+    embed.set_author(name=member.mention + " " + member.name + "#" + member.discriminator, icon_url=f'{member.display_avatar}')
+    embed.set_footer(text="ID: " + str(member.id))
+    await joinleave_log_channel.send(embed=embed)
 
 @bot.event
 async def on_reaction_remove(reaction, user):
